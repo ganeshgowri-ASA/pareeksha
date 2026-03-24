@@ -21,20 +21,16 @@ export function formatPercent(value: number, decimals: number = 1): string {
 
 /** Export data as CSV and trigger download */
 export function exportToCSV(
-  data: Record<string, string | number>[],
+  headers: string[],
+  rows: string[][],
   filename: string = 'export.csv'
 ): void {
-  if (data.length === 0) return;
-
-  const headers = Object.keys(data[0]);
   const csvRows = [
     headers.join(','),
-    ...data.map((row) =>
-      headers
-        .map((h) => {
-          const val = row[h];
+    ...rows.map((row) =>
+      row
+        .map((val) => {
           const str = String(val ?? '');
-          // Escape values containing commas or quotes
           if (str.includes(',') || str.includes('"') || str.includes('\n')) {
             return `"${str.replace(/"/g, '""')}"`;
           }
@@ -57,3 +53,6 @@ export function exportToCSV(
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+/** Alias for backward compatibility */
+export const exportCSV = exportToCSV;

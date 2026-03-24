@@ -35,6 +35,7 @@ export default function DepartmentManager() {
         projectsPerYear: draft.projectsPerYear ?? 5,
         bomsPerProject: draft.bomsPerProject ?? 3,
         modulesPerBom: draft.modulesPerBom ?? 8,
+        standardId: 'IEC',
         color: COLORS[departments.length % COLORS.length],
       });
       setShowAdd(false);

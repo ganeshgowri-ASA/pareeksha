@@ -1,4 +1,4 @@
-import { ChamberType } from './types';
+import { ChamberType, ChamberCategory } from './types';
 
 export const CHAMBERS: ChamberType[] = [
   // Damp Heat
@@ -6,7 +6,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'DH1000',
     category: 'DH',
     name: 'Damp Heat 1000h',
-    description: '85°C/85% RH for 1000 hours',
+    description: '85\u00b0C/85% RH for 1000 hours',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 1050,
@@ -15,7 +15,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'DH2000',
     category: 'DH',
     name: 'Damp Heat 2000h',
-    description: '85°C/85% RH for 2000 hours',
+    description: '85\u00b0C/85% RH for 2000 hours',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 2100,
@@ -24,7 +24,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'DH3000',
     category: 'DH',
     name: 'Damp Heat 3000h',
-    description: '85°C/85% RH for 3000 hours',
+    description: '85\u00b0C/85% RH for 3000 hours',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 3150,
@@ -34,7 +34,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'TC50',
     category: 'TC',
     name: 'Thermal Cycling 50',
-    description: '-40°C to +85°C, 50 cycles',
+    description: '-40\u00b0C to +85\u00b0C, 50 cycles',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 500,
@@ -43,7 +43,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'TC200',
     category: 'TC',
     name: 'Thermal Cycling 200',
-    description: '-40°C to +85°C, 200 cycles',
+    description: '-40\u00b0C to +85\u00b0C, 200 cycles',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 1600,
@@ -52,7 +52,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'TC400',
     category: 'TC',
     name: 'Thermal Cycling 400',
-    description: '-40°C to +85°C, 400 cycles',
+    description: '-40\u00b0C to +85\u00b0C, 400 cycles',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 3200,
@@ -61,7 +61,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'TC600',
     category: 'TC',
     name: 'Thermal Cycling 600',
-    description: '-40°C to +85°C, 600 cycles',
+    description: '-40\u00b0C to +85\u00b0C, 600 cycles',
     slotsFullSize: 20,
     slotsMiniModule: 20,
     testDurationHrs: 4800,
@@ -71,7 +71,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'HF10',
     category: 'HF',
     name: 'Humidity Freeze 10',
-    description: '-40°C to +85°C/85% RH, 10 cycles',
+    description: '-40\u00b0C to +85\u00b0C/85% RH, 10 cycles',
     slotsFullSize: 10,
     slotsMiniModule: 20,
     testDurationHrs: 500,
@@ -80,7 +80,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'HF20',
     category: 'HF',
     name: 'Humidity Freeze 20',
-    description: '-40°C to +85°C/85% RH, 20 cycles',
+    description: '-40\u00b0C to +85\u00b0C/85% RH, 20 cycles',
     slotsFullSize: 10,
     slotsMiniModule: 20,
     testDurationHrs: 1000,
@@ -89,7 +89,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'HF40',
     category: 'HF',
     name: 'Humidity Freeze 40',
-    description: '-40°C to +85°C/85% RH, 40 cycles',
+    description: '-40\u00b0C to +85\u00b0C/85% RH, 40 cycles',
     slotsFullSize: 10,
     slotsMiniModule: 20,
     testDurationHrs: 2000,
@@ -118,7 +118,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'UV15',
     category: 'UV',
     name: 'UV Preconditioning 15kWh',
-    description: 'UV exposure 15 kWh/m²',
+    description: 'UV exposure 15 kWh/m\u00b2',
     slotsFullSize: 2,
     slotsMiniModule: 2,
     testDurationHrs: 120,
@@ -127,7 +127,7 @@ export const CHAMBERS: ChamberType[] = [
     id: 'UV60',
     category: 'UV',
     name: 'UV Exposure 60kWh',
-    description: 'UV exposure 60 kWh/m²',
+    description: 'UV exposure 60 kWh/m\u00b2',
     slotsFullSize: 2,
     slotsMiniModule: 2,
     testDurationHrs: 480,
@@ -194,6 +194,11 @@ export const CHAMBERS: ChamberType[] = [
   },
 ];
 
+/** Unique chamber categories */
+export const CHAMBER_CATEGORIES: ChamberCategory[] = [
+  'DH', 'TC', 'HF', 'PID', 'UV', 'SaltMist', 'SandDust', 'MechLoad', 'Hail', 'BDT', 'IPTest',
+];
+
 /** Look up a chamber by ID */
 export function getChamber(id: string): ChamberType | undefined {
   return CHAMBERS.find((c) => c.id === id);
@@ -204,8 +209,9 @@ export function getChambersByCategory(category: string): ChamberType[] {
   return CHAMBERS.filter((c) => c.category === category);
 }
 
-/** Default work hours per year: 300 days × 24 hrs */
+/** Default work hours per year: 300 days x 24 hrs */
 export const DEFAULT_WORK_HOURS_PER_YEAR = 7200;
+export const WORK_HRS_PER_YEAR = 7200;
 
 /** Default realisation rate */
 export const DEFAULT_REALISATION_RATE = 0.65;

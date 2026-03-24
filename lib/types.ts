@@ -27,62 +27,49 @@ export interface ChamberType {
 
 /** BoM component identifiers */
 export type BoMComponent =
-  | 'Glass'
-  | 'Encapsulant'
-  | 'Cell'
-  | 'Frame'
-  | 'JunctionBox'
-  | 'Backsheet'
-  | 'Foil'
-  | 'Wafer'
-  | 'Ribbon'
-  | 'Sealant'
-  | 'Potting';
+  | 'Glass' | 'Encapsulant' | 'Cell' | 'Frame' | 'JunctionBox'
+  | 'Backsheet' | 'Foil' | 'Wafer' | 'Ribbon' | 'Sealant' | 'Potting';
 
 /** Change type identifiers */
 export type ChangeType =
-  | 'NewSupplier'
-  | 'MaterialChange'
-  | 'NewFactoryLine'
-  | 'DesignChange'
-  | 'BOMUpgrade'
-  | 'Requalification';
+  | 'NewSupplier' | 'MaterialChange' | 'NewFactory'
+  | 'DesignChange' | 'BOMUpgrade' | 'Requalification';
 
 /** Standard identifiers */
-export type StandardId = 'IEC_61215' | 'MNRE_ALMM' | 'REC' | 'Custom';
+export type StandardId = 'IEC' | 'MNRE' | 'REC' | 'Custom';
 
-/** Test definition within a standard */
-export interface TestDefinition {
+/** Test profile within a standard */
+export interface TestProfile {
   id: string;
   name: string;
-  chamberTypeId: ChamberTypeId;
+  chamberType: ChamberTypeId;
+  testHours: number;
+  samplesRequired: number;
+  description: string;
+  /** Alias for testHours (DARSHANA compat) */
+  durationHrs: number;
+  /** Alias for samplesRequired (DARSHANA compat) */
   modulesRequired: number;
-  description?: string;
 }
 
-/** Test sequence for a standard */
+/** Test sequence grouping */
 export interface TestSequence {
   id: string;
   name: string;
-  tests: TestDefinition[];
+  tests: { id: string; name: string; chamberTypeId: ChamberTypeId; modulesRequired: number }[];
 }
 
 /** Standard profile with test mappings */
 export interface Standard {
   id: StandardId;
+  code: string;
   name: string;
   description: string;
+  tests: TestProfile[];
+  /** Alias for tests (DARSHANA compat) */
+  testProfiles: TestProfile[];
   sequences: TestSequence[];
   bomTestMapping: Record<BoMComponent, ChamberTypeId[]>;
-}
-
-/** Test profile (subset of tests for a specific purpose) */
-export interface TestProfile {
-  id: string;
-  name: string;
-  standardId: StandardId;
-  selectedTests: string[];
-  description?: string;
 }
 
 /** Department definition */
@@ -90,32 +77,44 @@ export interface Department {
   id: string;
   name: string;
   description: string;
-  defaultProjectsPerYear: number;
-  defaultBomsPerProject: number;
-  defaultModulesPerBom: number;
-  standardId: StandardId;
-}
-
-/** Input for chamber calculation */
-export interface CalculationInput {
-  projects: number;
+  projectsPerYear: number;
   bomsPerProject: number;
   modulesPerBom: number;
-  testDurationHrs: number;
-  slotsPerChamber: number;
-  workHoursPerYear?: number;
-  realisationRate?: number;
+  standardId: StandardId;
+  color?: string;
 }
 
-/** Result of chamber calculation */
+/** BoM change entry */
+export interface BoMChange {
+  component: BoMComponent;
+  changeType: ChangeType;
+  selected: boolean;
+}
+
+/** Calculation input */
+export interface CalculationInput {
+  projects: number;
+  boms: number;
+  modules: number;
+  realisationRate: number;
+  workHoursPerYear: number;
+}
+
+/** Unified calculation result */
 export interface CalculationResult {
-  chamberTypeId: ChamberTypeId;
+  chamberType: ChamberTypeId;
   chamberName: string;
-  chambersNeeded: number;
-  chambersRounded: number;
+  slots: number;
   totalTestHours: number;
-  totalCapacityHours: number;
-  utilizationPercent: number;
+  /** Alias for totalTestHours (DARSHANA compat) */
+  totalTestHrs: number;
+  chambersRequired: number;
+  /** Alias for chambersRequired (DARSHANA compat) */
+  chambersNeeded: number;
+  utilization: number;
+  /** Alias for utilization (DARSHANA compat) */
+  utilizationPct: number;
+  bottleneck: boolean;
 }
 
 /** Department calculation result */
@@ -126,21 +125,21 @@ export interface DepartmentResult {
   totalChambers: number;
 }
 
-/** BoM change entry */
-export interface BoMChangeEntry {
+/** Reliability test entry */
+export interface ReliabilityTest {
   id: string;
-  component: BoMComponent;
-  changeType: ChangeType;
-  description?: string;
-  projectCount: number;
+  name: string;
+  chamberType: ChamberTypeId;
+  testHours: number;
+  samplesRequired: number;
+  annualDemand: number;
+  chambersNeeded: number;
 }
 
 /** Global app state */
 export interface AppState {
   selectedStandard: StandardId;
+  calculationInput: CalculationInput;
   departments: Department[];
-  bomChanges: BoMChangeEntry[];
-  realisationRate: number;
-  workHoursPerYear: number;
-  results: DepartmentResult[];
+  bomChanges: BoMChange[];
 }

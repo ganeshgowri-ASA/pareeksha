@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { STANDARDS } from "@/lib/standards";
-import { CHAMBERS } from "@/lib/chambers";
+import { STANDARDS, getStandard } from "@/lib/standards";
+import { getChamber } from "@/lib/chambers";
 import type { StandardId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ const TABS: { id: StandardId; label: string }[] = [
 export default function StandardsConfig() {
   const { selectedStandard, setSelectedStandard } = useAppStore();
   const [activeTab, setActiveTab] = useState<StandardId>(selectedStandard);
-  const standard = STANDARDS[activeTab];
+  const standard = getStandard(activeTab);
 
   const handleTabClick = (id: StandardId) => {
     setActiveTab(id);
@@ -67,7 +67,7 @@ export default function StandardsConfig() {
               {standard.tests.map((test) => (
                 <tr key={test.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium text-slate-800">{test.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{CHAMBERS[test.chamberType].name}</td>
+                  <td className="px-4 py-3 text-slate-600">{getChamber(test.chamberType)?.name ?? test.chamberType}</td>
                   <td className="px-4 py-3 text-right text-slate-600">{test.testHours}</td>
                   <td className="px-4 py-3 text-right text-slate-600">{test.samplesRequired}</td>
                   <td className="px-4 py-3 text-xs text-slate-500">{test.description}</td>
