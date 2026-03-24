@@ -1,18 +1,16 @@
-"use client";
-
-import ChamberCalculator from "@/components/chamber-calculator";
+'use client';
 
 export default function CalculatorPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Chamber Calculator</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Estimate environmental chamber requirements based on project demand
+        <h1 className="text-2xl font-bold text-surface-900">Chamber Calculator</h1>
+        <p className="text-sm text-surface-500 mt-1">
+          Calculate chamber requirements based on project parameters
         </p>
       </div>
-      <div className="card">
-        <ChamberCalculator />
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200 empty-state">
+        <p className="text-sm text-surface-500">Calculator form will be integrated after merge with Session B.</p>
       </div>
     </div>
   );

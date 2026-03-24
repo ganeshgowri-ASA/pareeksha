@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import Sidebar from "@/components/sidebar";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import Sidebar from '@/components/sidebar';
 
 export const metadata: Metadata = {
-  title: "Pareeksha - Chamber Estimation Tool",
-  description: "Environmental chamber quantity estimation for PV module qualification testing",
+  title: 'Pareeksha - Chamber Estimation Tool',
+  description: 'Environmental chamber quantity estimation for manufacturing units and labs',
 };
 
 export default function RootLayout({
@@ -14,12 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans">
+      <body className="font-sans antialiased">
         <Sidebar />
-        <main className="min-h-screen lg:pl-[260px]">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            {children}
-          </div>
+        <main className="md:ml-64 min-h-screen bg-surface-50 p-6 md:p-8">
+          {children}
         </main>
       </body>
     </html>

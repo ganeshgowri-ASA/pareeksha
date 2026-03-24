@@ -1,89 +1,70 @@
-// Stub types for UI compilation - Session A (Neeti) owns the real implementations
-
-export type ChamberType =
-  | "DH1000" | "DH2000" | "DH3000"
-  | "TC50" | "TC200" | "TC400" | "TC600"
-  | "HF10" | "HF20" | "HF40"
-  | "PID108" | "PID288"
-  | "UV15" | "UV60"
-  | "SaltMist" | "SandDust" | "MechLoad" | "Hail";
-
-export type ChamberCategory = "DH" | "TC" | "HF" | "PID" | "UV" | "SaltMist" | "SandDust" | "MechLoad" | "Hail";
-
-export interface Chamber {
-  id: ChamberType;
-  category: ChamberCategory;
+export interface ChamberVariant {
   name: string;
-  slots: number;
-  testHours: number;
-  description: string;
+  durationHrs: number;
+  cycles?: number;
 }
 
-export type BoMComponent =
-  | "Glass" | "Encapsulant" | "Cell" | "Frame" | "JunctionBox"
-  | "Backsheet" | "Foil" | "Wafer" | "Ribbon" | "Sealant" | "Potting";
+export interface ChamberType {
+  id: string;
+  name: string;
+  category: string;
+  slotsFS: number;
+  slotsMM: number;
+  variants: ChamberVariant[];
+}
 
-export type ChangeType =
-  | "NewSupplier" | "MaterialChange" | "NewFactory"
-  | "DesignChange" | "BOMUpgrade" | "Requalification";
+export interface BoMComponent {
+  id: string;
+  name: string;
+  category: string;
+}
 
-export interface BoMChange {
-  component: BoMComponent;
-  changeType: ChangeType;
-  selected: boolean;
+export interface ChangeType {
+  id: string;
+  name: string;
+  testsRequired: string[];
 }
 
 export interface TestProfile {
   id: string;
-  name: string;
-  chamberType: ChamberType;
-  testHours: number;
-  samplesRequired: number;
-  description: string;
+  chamberType: string;
+  durationHrs: number;
+  modulesRequired: number;
+  standard: string;
 }
 
 export interface Department {
   id: string;
   name: string;
-  description: string;
   projectsPerYear: number;
   bomsPerProject: number;
   modulesPerBom: number;
-  color: string;
 }
 
-export type StandardId = "IEC" | "MNRE" | "REC" | "Custom";
-
 export interface Standard {
-  id: StandardId;
+  id: string;
   name: string;
-  description: string;
-  tests: TestProfile[];
+  code: string;
+  testProfiles: TestProfile[];
 }
 
 export interface CalculationInput {
-  projects: number;
-  boms: number;
-  modules: number;
-  realisationRate: number;
-  workHoursPerYear: number;
+  departments: Department[];
+  bomChanges: Record<string, string[]>;
+  standard: Standard;
+  realizationRate: number;
 }
 
 export interface CalculationResult {
-  chamberType: ChamberType;
-  chamberName: string;
-  totalTestHours: number;
-  chambersRequired: number;
-  utilization: number;
-  slots: number;
+  chamberType: string;
+  chambersNeeded: number;
+  utilizationPct: number;
+  totalTestHrs: number;
+  bottleneck: boolean;
 }
 
-export interface ReliabilityTest {
-  id: string;
-  name: string;
-  chamberType: ChamberType;
-  testHours: number;
-  samplesRequired: number;
-  annualDemand: number;
-  chambersNeeded: number;
+export interface BomChange {
+  componentId: string;
+  changeTypeId: string;
+  selected: boolean;
 }

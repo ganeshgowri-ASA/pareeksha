@@ -1,43 +1,80 @@
-import { CalculationInput, CalculationResult, ChamberType } from "./types";
-import { CHAMBERS } from "./chambers";
+import { CHAMBERS, WORK_HRS_PER_YEAR, DEFAULT_REALISATION_RATE } from './chambers';
+import { Department, Standard, CalculationResult } from './types';
 
-const DEFAULT_WORK_HOURS = 7200; // 300 days x 24 hrs
-
-export function calculateChambers(
-  input: CalculationInput,
-  chamberType: ChamberType
-): CalculationResult {
-  const chamber = CHAMBERS[chamberType];
-  const workHours = input.workHoursPerYear || DEFAULT_WORK_HOURS;
-  const totalTestHours = input.projects * input.boms * input.modules * chamber.testHours;
-  const capacity = chamber.slots * workHours * input.realisationRate;
-  const chambersRequired = capacity > 0 ? Math.ceil(totalTestHours / capacity) : 0;
-  const utilization = chambersRequired > 0
-    ? (totalTestHours / (chambersRequired * capacity)) * 100
-    : 0;
-
-  return {
-    chamberType,
-    chamberName: chamber.name,
-    totalTestHours,
-    chambersRequired,
-    utilization: Math.round(utilization * 10) / 10,
-    slots: chamber.slots,
-  };
+export function calcTestHoursPerChamber(
+  standard: Standard,
+  totalBomChanges: number
+): Record<string, number> {
+  const hours: Record<string, number> = {};
+  for (const profile of standard.testProfiles) {
+    const existing = hours[profile.chamberType] || 0;
+    hours[profile.chamberType] = existing + profile.durationHrs * totalBomChanges;
+  }
+  return hours;
 }
 
-export function calculateAllChambers(input: CalculationInput): CalculationResult[] {
-  return (Object.keys(CHAMBERS) as ChamberType[]).map((ct) =>
-    calculateChambers(input, ct)
+export function calcChambersNeeded(
+  testHrs: number,
+  slots: number,
+  realizationRate: number = DEFAULT_REALISATION_RATE
+): number {
+  const capacity = slots * WORK_HRS_PER_YEAR * realizationRate;
+  if (capacity <= 0) return 0;
+  return Math.ceil(testHrs / capacity);
+}
+
+export function calcUtilization(
+  testHrs: number,
+  chambers: number,
+  slots: number
+): number {
+  const capacity = chambers * slots * WORK_HRS_PER_YEAR;
+  if (capacity <= 0) return 0;
+  return Math.min(100, (testHrs / capacity) * 100);
+}
+
+export function calcAllDepartments(
+  departments: Department[],
+  standard: Standard,
+  realizationRate: number = DEFAULT_REALISATION_RATE
+): CalculationResult[] {
+  const totalBomChanges = departments.reduce(
+    (sum, d) => sum + d.projectsPerYear * d.bomsPerProject,
+    0
   );
-}
 
-export function totalChambersNeeded(results: CalculationResult[]): number {
-  return results.reduce((sum, r) => sum + r.chambersRequired, 0);
-}
+  const hoursPerChamber = calcTestHoursPerChamber(standard, totalBomChanges);
 
-export function averageUtilization(results: CalculationResult[]): number {
-  const active = results.filter((r) => r.chambersRequired > 0);
-  if (active.length === 0) return 0;
-  return Math.round(active.reduce((sum, r) => sum + r.utilization, 0) / active.length * 10) / 10;
+  const results: CalculationResult[] = [];
+  let maxUtil = 0;
+  let bottleneckType = '';
+
+  for (const chamber of CHAMBERS) {
+    const testHrs = hoursPerChamber[chamber.id] || 0;
+    if (testHrs === 0) continue;
+
+    const needed = calcChambersNeeded(testHrs, chamber.slotsFS, realizationRate);
+    const util = calcUtilization(testHrs, needed, chamber.slotsFS);
+
+    if (util > maxUtil) {
+      maxUtil = util;
+      bottleneckType = chamber.id;
+    }
+
+    results.push({
+      chamberType: chamber.id,
+      chambersNeeded: needed,
+      utilizationPct: Math.round(util * 10) / 10,
+      totalTestHrs: testHrs,
+      bottleneck: false,
+    });
+  }
+
+  for (const r of results) {
+    if (r.chamberType === bottleneckType) {
+      r.bottleneck = true;
+    }
+  }
+
+  return results;
 }

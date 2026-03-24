@@ -1,18 +1,16 @@
-"use client";
+'use client';
 
-import BoMChangeMatrix from "@/components/bom-change-matrix";
-
-export default function BoMMatrixPage() {
+export default function BomMatrixPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">BoM Change Matrix</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Map bill-of-material changes to required qualification tests
+        <h1 className="text-2xl font-bold text-surface-900">BoM Change Matrix</h1>
+        <p className="text-sm text-surface-500 mt-1">
+          Map bill-of-material changes to required test sequences
         </p>
       </div>
-      <div className="card">
-        <BoMChangeMatrix />
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200 empty-state">
+        <p className="text-sm text-surface-500">BoM Change Matrix will be integrated after merge with Session B.</p>
       </div>
     </div>
   );

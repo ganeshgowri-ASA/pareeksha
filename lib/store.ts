@@ -1,85 +1,72 @@
-"use client";
-
-import { create } from "zustand";
-import {
-  BoMChange,
-  BoMComponent,
-  CalculationInput,
-  ChangeType,
-  Department,
-  StandardId,
-} from "./types";
-import { DEFAULT_DEPARTMENTS } from "./departments";
-
-const BOM_COMPONENTS: BoMComponent[] = [
-  "Glass", "Encapsulant", "Cell", "Frame", "JunctionBox",
-  "Backsheet", "Foil", "Wafer", "Ribbon", "Sealant", "Potting",
-];
-
-const CHANGE_TYPES: ChangeType[] = [
-  "NewSupplier", "MaterialChange", "NewFactory",
-  "DesignChange", "BOMUpgrade", "Requalification",
-];
-
-function createInitialBoMChanges(): BoMChange[] {
-  const changes: BoMChange[] = [];
-  for (const component of BOM_COMPONENTS) {
-    for (const changeType of CHANGE_TYPES) {
-      changes.push({ component, changeType, selected: false });
-    }
-  }
-  return changes;
-}
+import { create } from 'zustand';
+import { Department, Standard, CalculationResult, BomChange } from './types';
+import { DEFAULT_DEPARTMENTS } from './departments';
+import { STANDARDS } from './standards';
+import { calcAllDepartments } from './formulas';
+import { DEFAULT_REALISATION_RATE } from './chambers';
 
 interface AppState {
-  selectedStandard: StandardId;
-  setSelectedStandard: (s: StandardId) => void;
+  selectedStandard: Standard;
   departments: Department[];
-  setDepartments: (d: Department[]) => void;
-  addDepartment: (d: Department) => void;
+  bomChanges: BomChange[];
+  results: CalculationResult[];
+  realizationRate: number;
+  setStandard: (id: string) => void;
+  addDepartment: (dept: Department) => void;
+  updateDepartment: (id: string, updates: Partial<Department>) => void;
   removeDepartment: (id: string) => void;
-  updateDepartment: (id: string, d: Partial<Department>) => void;
-  bomChanges: BoMChange[];
-  toggleBoMChange: (component: BoMComponent, changeType: ChangeType) => void;
-  calculationInput: CalculationInput;
-  setCalculationInput: (input: Partial<CalculationInput>) => void;
+  setBomChanges: (changes: BomChange[]) => void;
+  setRealizationRate: (rate: number) => void;
+  calculateAll: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  selectedStandard: "IEC",
-  setSelectedStandard: (s) => set({ selectedStandard: s }),
+export const useAppStore = create<AppState>((set, get) => ({
+  selectedStandard: STANDARDS[0],
   departments: DEFAULT_DEPARTMENTS,
-  setDepartments: (d) => set({ departments: d }),
-  addDepartment: (d) =>
-    set((state) => ({ departments: [...state.departments, d] })),
-  removeDepartment: (id) =>
-    set((state) => ({
-      departments: state.departments.filter((dept) => dept.id !== id),
-    })),
-  updateDepartment: (id, updates) =>
-    set((state) => ({
-      departments: state.departments.map((dept) =>
-        dept.id === id ? { ...dept, ...updates } : dept
-      ),
-    })),
-  bomChanges: createInitialBoMChanges(),
-  toggleBoMChange: (component, changeType) =>
-    set((state) => ({
-      bomChanges: state.bomChanges.map((bc) =>
-        bc.component === component && bc.changeType === changeType
-          ? { ...bc, selected: !bc.selected }
-          : bc
-      ),
-    })),
-  calculationInput: {
-    projects: 10,
-    boms: 4,
-    modules: 8,
-    realisationRate: 0.65,
-    workHoursPerYear: 7200,
+  bomChanges: [],
+  results: [],
+  realizationRate: DEFAULT_REALISATION_RATE,
+
+  setStandard: (id: string) => {
+    const std = STANDARDS.find((s) => s.id === id);
+    if (std) {
+      set({ selectedStandard: std });
+      get().calculateAll();
+    }
   },
-  setCalculationInput: (input) =>
-    set((state) => ({
-      calculationInput: { ...state.calculationInput, ...input },
-    })),
+
+  addDepartment: (dept: Department) => {
+    set((s) => ({ departments: [...s.departments, dept] }));
+    get().calculateAll();
+  },
+
+  updateDepartment: (id: string, updates: Partial<Department>) => {
+    set((s) => ({
+      departments: s.departments.map((d) =>
+        d.id === id ? { ...d, ...updates } : d
+      ),
+    }));
+    get().calculateAll();
+  },
+
+  removeDepartment: (id: string) => {
+    set((s) => ({ departments: s.departments.filter((d) => d.id !== id) }));
+    get().calculateAll();
+  },
+
+  setBomChanges: (changes: BomChange[]) => {
+    set({ bomChanges: changes });
+    get().calculateAll();
+  },
+
+  setRealizationRate: (rate: number) => {
+    set({ realizationRate: rate });
+    get().calculateAll();
+  },
+
+  calculateAll: () => {
+    const { departments, selectedStandard, realizationRate } = get();
+    const results = calcAllDepartments(departments, selectedStandard, realizationRate);
+    set({ results });
+  },
 }));

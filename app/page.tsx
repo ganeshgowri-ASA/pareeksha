@@ -1,132 +1,98 @@
-"use client";
+'use client';
 
-import { Boxes, Gauge, FlaskConical, Building2 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
-import { StatCard } from "@/components/dashboard-cards";
-import { useAppStore } from "@/lib/store";
-import { calculateAllChambers, totalChambersNeeded, averageUtilization } from "@/lib/formulas";
-import { CHAMBER_CATEGORIES } from "@/lib/chambers";
-
-const PIE_COLORS = ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626"];
+import { useEffect, useState } from 'react';
+import { Boxes, Gauge, AlertTriangle, FolderOpen } from 'lucide-react';
+import { useAppStore } from '@/lib/store';
+import { CHAMBERS } from '@/lib/chambers';
+import { StatCard, SkeletonCard } from '@/components/dashboard-cards';
+import { ChamberBarChart, TestHoursPieChart, UtilizationBarChart } from '@/components/chart-widgets';
 
 export default function DashboardPage() {
-  const { calculationInput, departments } = useAppStore();
-  const results = calculateAllChambers(calculationInput);
-  const total = totalChambersNeeded(results);
-  const avgUtil = averageUtilization(results);
+  const { results, departments, calculateAll } = useAppStore();
+  const [loading, setLoading] = useState(true);
 
-  // Aggregate chambers by category
-  const barData = CHAMBER_CATEGORIES.map((cat) => {
-    const catResults = results.filter((r) => r.chamberType.startsWith(cat));
-    return {
-      name: cat,
-      chambers: catResults.reduce((s, r) => s + r.chambersRequired, 0),
-      hours: catResults.reduce((s, r) => s + r.totalTestHours, 0),
-    };
-  }).filter((d) => d.chambers > 0);
+  useEffect(() => {
+    calculateAll();
+    setLoading(false);
+  }, [calculateAll]);
 
-  // Department hours pie data
-  const pieData = departments.map((dept, i) => ({
-    name: dept.name.length > 20 ? dept.name.slice(0, 18) + "..." : dept.name,
-    value: dept.projectsPerYear * dept.bomsPerProject * dept.modulesPerBom,
-    color: PIE_COLORS[i % PIE_COLORS.length],
-  }));
-
-  const activeTests = results.filter((r) => r.chambersRequired > 0).length;
+  const totalChambers = results.reduce((s, r) => s + r.chambersNeeded, 0);
+  const avgUtilization = results.length > 0
+    ? Math.round(results.reduce((s, r) => s + r.utilizationPct, 0) / results.length)
+    : 0;
+  const bottleneck = results.find((r) => r.bottleneck);
+  const bottleneckName = bottleneck
+    ? CHAMBERS.find((c) => c.id === bottleneck.chamberType)?.name || bottleneck.chamberType
+    : 'None';
+  const totalProjects = departments.reduce((s, d) => s + d.projectsPerYear, 0);
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Chamber estimation overview
+        <h1 className="text-2xl font-bold text-surface-900">Dashboard</h1>
+        <p className="text-sm text-surface-500 mt-1">
+          Chamber estimation overview across all departments
         </p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Chambers"
-          value={total}
-          subtitle="Across all types"
-          icon={Boxes}
-          color="blue"
-        />
-        <StatCard
-          title="Avg Utilization"
-          value={`${avgUtil}%`}
-          subtitle="Active chambers"
-          icon={Gauge}
-          color="emerald"
-        />
-        <StatCard
-          title="Active Tests"
-          value={activeTests}
-          subtitle={`of ${results.length} test types`}
-          icon={FlaskConical}
-          color="amber"
-        />
-        <StatCard
-          title="Departments"
-          value={departments.length}
-          subtitle="Contributing demand"
-          icon={Building2}
-          color="rose"
-        />
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Total Chambers"
+              value={totalChambers}
+              subtitle="Across all types"
+              icon={Boxes}
+              color="blue"
+            />
+            <StatCard
+              title="Avg Utilization"
+              value={`${avgUtilization}%`}
+              subtitle="Chamber usage rate"
+              icon={Gauge}
+              color="green"
+            />
+            <StatCard
+              title="Bottleneck"
+              value={bottleneckName}
+              subtitle="Highest demand chamber"
+              icon={AlertTriangle}
+              color="red"
+            />
+            <StatCard
+              title="Active Projects"
+              value={totalProjects}
+              subtitle={`${departments.length} departments`}
+              icon={FolderOpen}
+              color="purple"
+            />
+          </>
+        )}
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card">
-          <h2 className="mb-4 text-base font-semibold text-slate-900">
-            Chambers by Type
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="chambers" fill="#2563eb" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+          <h2 className="text-lg font-semibold text-surface-800 mb-4">Chambers by Type</h2>
+          <ChamberBarChart results={results} />
         </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+          <h2 className="text-lg font-semibold text-surface-800 mb-4">Test Hours Distribution</h2>
+          <TestHoursPieChart results={results} />
+        </div>
+      </div>
 
-        <div className="card">
-          <h2 className="mb-4 text-base font-semibold text-slate-900">
-            Test Demand by Department
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                dataKey="value"
-                label={({ name }) => name}
-              >
-                {pieData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+        <h2 className="text-lg font-semibold text-surface-800 mb-4">Chamber Utilization</h2>
+        <UtilizationBarChart results={results} />
       </div>
     </div>
   );

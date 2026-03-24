@@ -1,97 +1,89 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import {
   LayoutDashboard,
   Grid3X3,
   Calculator,
-  ShieldCheck,
+  Shield,
   Building2,
   BookOpen,
-  FileDown,
+  Download,
   Menu,
   X,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/bom-matrix", label: "BoM Matrix", icon: Grid3X3 },
-  { href: "/calculator", label: "Calculator", icon: Calculator },
-  { href: "/reliability", label: "Reliability", icon: ShieldCheck },
-  { href: "/departments", label: "Departments", icon: Building2 },
-  { href: "/standards", label: "Standards", icon: BookOpen },
-  { href: "/export", label: "Export", icon: FileDown },
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/bom-matrix', label: 'BoM Matrix', icon: Grid3X3 },
+  { href: '/calculator', label: 'Calculator', icon: Calculator },
+  { href: '/reliability', label: 'Reliability', icon: Shield },
+  { href: '/departments', label: 'Departments', icon: Building2 },
+  { href: '/standards', label: 'Standards', icon: BookOpen },
+  { href: '/export', label: 'Export', icon: Download },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Mobile toggle */}
       <button
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed left-4 top-4 z-50 rounded-lg bg-white p-2 shadow-md lg:hidden"
-        aria-label="Toggle menu"
+        className="fixed top-4 left-4 z-50 md:hidden rounded-lg bg-white p-2 shadow-md focus-ring"
+        onClick={() => setOpen(!open)}
+        aria-label="Toggle navigation"
       >
-        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        {open ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Overlay */}
-      {mobileOpen && (
+      {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={() => setOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-full w-[260px] flex-col border-r border-slate-200 bg-white transition-transform lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+          'sidebar fixed top-0 left-0 z-40 h-full w-64 bg-surface-900 text-white flex flex-col transition-transform duration-200',
+          'md:translate-x-0',
+          open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
-            P
-          </div>
-          <span className="text-lg font-semibold text-slate-900">
-            Pareeksha
-          </span>
+        <div className="p-6 border-b border-surface-700">
+          <h1 className="text-xl font-bold tracking-tight">Pareeksha</h1>
+          <p className="text-xs text-surface-400 mt-1">Chamber Estimation Tool</p>
         </div>
 
-        <nav className="flex-1 space-y-1 p-4">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const isActive =
-              href === "/" ? pathname === "/" : pathname.startsWith(href);
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
             return (
               <Link
-                key={href}
-                href={href}
-                onClick={() => setMobileOpen(false)}
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth focus-ring',
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? 'bg-primary-600 text-white'
+                    : 'text-surface-300 hover:bg-surface-800 hover:text-white'
                 )}
               >
                 <Icon size={18} />
-                {label}
+                {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
-          <p className="text-xs text-slate-400">
-            Chamber Estimation Tool v0.1
-          </p>
+        <div className="p-4 border-t border-surface-700 text-xs text-surface-500">
+          v0.1.0
         </div>
       </aside>
     </>

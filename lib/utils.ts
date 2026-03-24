@@ -1,24 +1,30 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(n: number, decimals = 0): string {
-  return n.toLocaleString("en-IN", {
+export function formatNumber(n: number, decimals: number = 0): string {
+  return n.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
 }
 
-export function exportCSV(headers: string[], rows: string[][], filename: string) {
-  const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
+export function exportToCSV(headers: string[], rows: string[][], filename: string): void {
+  const csvContent = [
+    headers.join(','),
+    ...rows.map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ),
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
   URL.revokeObjectURL(url);
 }

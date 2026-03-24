@@ -1,38 +1,56 @@
-import { Standard, TestProfile } from "./types";
+import { Standard } from './types';
 
-const iecTests: TestProfile[] = [
-  { id: "iec-dh1000", name: "Damp Heat 1000h", chamberType: "DH1000", testHours: 1000, samplesRequired: 8, description: "MQT 13 - DH 1000h" },
-  { id: "iec-tc200", name: "Thermal Cycling 200", chamberType: "TC200", testHours: 800, samplesRequired: 8, description: "MQT 11 - TC 200 cycles" },
-  { id: "iec-tc50", name: "Thermal Cycling 50", chamberType: "TC50", testHours: 200, samplesRequired: 8, description: "MQT 11 - TC 50 cycles" },
-  { id: "iec-hf10", name: "Humidity Freeze 10", chamberType: "HF10", testHours: 240, samplesRequired: 8, description: "MQT 12 - HF 10 cycles" },
-  { id: "iec-uv15", name: "UV Preconditioning 15kWh", chamberType: "UV15", testHours: 360, samplesRequired: 8, description: "MQT 10 - UV 15kWh" },
-  { id: "iec-pid108", name: "PID 108h", chamberType: "PID108", testHours: 108, samplesRequired: 4, description: "PID resistance test" },
-  { id: "iec-hail", name: "Hail Impact", chamberType: "Hail", testHours: 4, samplesRequired: 4, description: "MQT 17 - Hail test" },
-  { id: "iec-mechload", name: "Mechanical Load", chamberType: "MechLoad", testHours: 8, samplesRequired: 4, description: "MQT 16 - Mech load" },
+export const STANDARDS: Standard[] = [
+  {
+    id: 'IEC_61215',
+    name: 'IEC 61215/61730',
+    code: 'IEC',
+    testProfiles: [
+      { id: 'iec-dh', chamberType: 'DH', durationHrs: 1050, modulesRequired: 4, standard: 'IEC_61215' },
+      { id: 'iec-tc', chamberType: 'TC', durationHrs: 1600, modulesRequired: 4, standard: 'IEC_61215' },
+      { id: 'iec-hf', chamberType: 'HF', durationHrs: 500, modulesRequired: 4, standard: 'IEC_61215' },
+      { id: 'iec-uv', chamberType: 'UV', durationHrs: 120, modulesRequired: 2, standard: 'IEC_61215' },
+      { id: 'iec-pid', chamberType: 'PID', durationHrs: 108, modulesRequired: 4, standard: 'IEC_61215' },
+      { id: 'iec-hail', chamberType: 'Hail', durationHrs: 2, modulesRequired: 2, standard: 'IEC_61215' },
+      { id: 'iec-ml', chamberType: 'ML', durationHrs: 24, modulesRequired: 2, standard: 'IEC_61215' },
+      { id: 'iec-bdt', chamberType: 'BDT', durationHrs: 4, modulesRequired: 4, standard: 'IEC_61215' },
+    ],
+  },
+  {
+    id: 'MNRE_ALMM',
+    name: 'MNRE ALMM',
+    code: 'MNRE',
+    testProfiles: [
+      { id: 'mnre-dh', chamberType: 'DH', durationHrs: 2100, modulesRequired: 4, standard: 'MNRE_ALMM' },
+      { id: 'mnre-tc', chamberType: 'TC', durationHrs: 3200, modulesRequired: 4, standard: 'MNRE_ALMM' },
+      { id: 'mnre-hf', chamberType: 'HF', durationHrs: 1000, modulesRequired: 4, standard: 'MNRE_ALMM' },
+      { id: 'mnre-uv', chamberType: 'UV', durationHrs: 480, modulesRequired: 2, standard: 'MNRE_ALMM' },
+      { id: 'mnre-pid', chamberType: 'PID', durationHrs: 108, modulesRequired: 4, standard: 'MNRE_ALMM' },
+      { id: 'mnre-hail', chamberType: 'Hail', durationHrs: 2, modulesRequired: 2, standard: 'MNRE_ALMM' },
+      { id: 'mnre-ml', chamberType: 'ML', durationHrs: 24, modulesRequired: 2, standard: 'MNRE_ALMM' },
+      { id: 'mnre-sm', chamberType: 'SM', durationHrs: 96, modulesRequired: 4, standard: 'MNRE_ALMM' },
+      { id: 'mnre-bdt', chamberType: 'BDT', durationHrs: 4, modulesRequired: 4, standard: 'MNRE_ALMM' },
+    ],
+  },
+  {
+    id: 'REC',
+    name: 'REC (Regional/Export)',
+    code: 'REC',
+    testProfiles: [
+      { id: 'rec-dh', chamberType: 'DH', durationHrs: 3150, modulesRequired: 6, standard: 'REC' },
+      { id: 'rec-tc', chamberType: 'TC', durationHrs: 4800, modulesRequired: 6, standard: 'REC' },
+      { id: 'rec-hf', chamberType: 'HF', durationHrs: 2000, modulesRequired: 6, standard: 'REC' },
+      { id: 'rec-uv', chamberType: 'UV', durationHrs: 480, modulesRequired: 2, standard: 'REC' },
+      { id: 'rec-pid', chamberType: 'PID', durationHrs: 288, modulesRequired: 4, standard: 'REC' },
+      { id: 'rec-sm', chamberType: 'SM', durationHrs: 96, modulesRequired: 4, standard: 'REC' },
+      { id: 'rec-ml', chamberType: 'ML', durationHrs: 24, modulesRequired: 2, standard: 'REC' },
+      { id: 'rec-hail', chamberType: 'Hail', durationHrs: 2, modulesRequired: 2, standard: 'REC' },
+      { id: 'rec-bdt', chamberType: 'BDT', durationHrs: 4, modulesRequired: 4, standard: 'REC' },
+      { id: 'rec-ip', chamberType: 'IP', durationHrs: 24, modulesRequired: 2, standard: 'REC' },
+    ],
+  },
 ];
 
-const mnreTests: TestProfile[] = [
-  ...iecTests,
-  { id: "mnre-dh2000", name: "Damp Heat 2000h", chamberType: "DH2000", testHours: 2000, samplesRequired: 8, description: "ALMM extended DH" },
-  { id: "mnre-tc400", name: "Thermal Cycling 400", chamberType: "TC400", testHours: 1600, samplesRequired: 8, description: "ALMM extended TC" },
-  { id: "mnre-pid288", name: "PID 288h", chamberType: "PID288", testHours: 288, samplesRequired: 4, description: "ALMM extended PID" },
-  { id: "mnre-salt", name: "Salt Mist Corrosion", chamberType: "SaltMist", testHours: 96, samplesRequired: 4, description: "ALMM salt mist" },
-];
-
-const recTests: TestProfile[] = [
-  ...iecTests,
-  { id: "rec-dh3000", name: "Damp Heat 3000h", chamberType: "DH3000", testHours: 3000, samplesRequired: 8, description: "REC extended DH" },
-  { id: "rec-tc600", name: "Thermal Cycling 600", chamberType: "TC600", testHours: 2400, samplesRequired: 8, description: "REC extended TC" },
-  { id: "rec-hf40", name: "Humidity Freeze 40", chamberType: "HF40", testHours: 960, samplesRequired: 8, description: "REC extended HF" },
-  { id: "rec-uv60", name: "UV Extended 60kWh", chamberType: "UV60", testHours: 1440, samplesRequired: 4, description: "REC extended UV" },
-  { id: "rec-sand", name: "Sand & Dust", chamberType: "SandDust", testHours: 24, samplesRequired: 4, description: "REC sand/dust test" },
-];
-
-export const STANDARDS: Record<string, Standard> = {
-  IEC: { id: "IEC", name: "IEC 61215/61730", description: "International standard for PV module qualification", tests: iecTests },
-  MNRE: { id: "MNRE", name: "MNRE ALMM", description: "India mandatory ALMM qualification", tests: mnreTests },
-  REC: { id: "REC", name: "REC Certification", description: "Regional/export certification standard", tests: recTests },
-  Custom: { id: "Custom", name: "Custom Profile", description: "User-defined test profile", tests: [] },
-};
-
-export const STANDARD_LIST = Object.values(STANDARDS);
+export function getStandardById(id: string): Standard | undefined {
+  return STANDARDS.find((s) => s.id === id);
+}
