@@ -1,6 +1,6 @@
 {
   "name": "pareeksha",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.462.0",
     "next": "14.2.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.0",
     "tailwind-merge": "^2.6.0",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

@@ -10,7 +10,6 @@ import {
   ChangeType,
   Department,
   StandardId,
-  CalculationInput,
 } from './types';
 import { DEFAULT_DEPARTMENTS } from './departments';
 import { DEFAULT_WORK_HOURS_PER_YEAR, DEFAULT_REALISATION_RATE } from './chambers';

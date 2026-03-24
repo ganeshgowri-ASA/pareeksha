@@ -20,7 +20,7 @@ export interface ChamberType {
   category: ChamberCategory;
   name: string;
   description: string;
-  slots: number;
+  slots?: number;
   slotsFullSize: number;
   slotsMiniModule: number;
   testDurationHrs: number;
