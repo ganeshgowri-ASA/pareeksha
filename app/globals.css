@@ -17,6 +17,7 @@
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
   --sidebar-width: 260px;
+  --header-height: 64px;
 }
 
 .dark {
@@ -29,6 +30,27 @@
 
 @layer base {
   body {
-    @apply bg-surface-light text-slate-900 dark:bg-surface-dark dark:text-slate-50;
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl bg-white p-6 shadow-sm border border-slate-200;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2;
+  }
+  .input-field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
