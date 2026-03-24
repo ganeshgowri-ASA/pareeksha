@@ -28,13 +28,20 @@ export default function DepartmentManager() {
 
   const handleAdd = () => {
     if (draft.name) {
+      const ppy = draft.projectsPerYear ?? 5;
+      const bpp = draft.bomsPerProject ?? 3;
+      const mpb = draft.modulesPerBom ?? 8;
       addDepartment({
         id: `dept-${Date.now()}`,
         name: draft.name,
         description: draft.description ?? "",
-        projectsPerYear: draft.projectsPerYear ?? 5,
-        bomsPerProject: draft.bomsPerProject ?? 3,
-        modulesPerBom: draft.modulesPerBom ?? 8,
+        projectsPerYear: ppy,
+        bomsPerProject: bpp,
+        modulesPerBom: mpb,
+        defaultProjectsPerYear: ppy,
+        defaultBomsPerProject: bpp,
+        defaultModulesPerBom: mpb,
+        standardId: 'IEC',
         color: COLORS[departments.length % COLORS.length],
       });
       setShowAdd(false);

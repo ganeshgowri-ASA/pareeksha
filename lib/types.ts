@@ -20,6 +20,7 @@ export interface ChamberType {
   category: ChamberCategory;
   name: string;
   description: string;
+  slots: number;
   slotsFullSize: number;
   slotsMiniModule: number;
   testDurationHrs: number;
@@ -43,20 +44,24 @@ export type BoMComponent =
 export type ChangeType =
   | 'NewSupplier'
   | 'MaterialChange'
-  | 'NewFactoryLine'
+  | 'NewFactory'
   | 'DesignChange'
   | 'BOMUpgrade'
   | 'Requalification';
 
 /** Standard identifiers */
-export type StandardId = 'IEC_61215' | 'MNRE_ALMM' | 'REC' | 'Custom';
+export type StandardId = 'IEC' | 'MNRE' | 'REC' | 'Custom';
 
 /** Test definition within a standard */
 export interface TestDefinition {
   id: string;
   name: string;
+  chamberType: ChamberTypeId;
   chamberTypeId: ChamberTypeId;
+  testHours: number;
+  samplesRequired: number;
   modulesRequired: number;
+  durationHrs: number;
   description?: string;
 }
 
@@ -70,8 +75,11 @@ export interface TestSequence {
 /** Standard profile with test mappings */
 export interface Standard {
   id: StandardId;
+  code: string;
   name: string;
   description: string;
+  tests: TestDefinition[];
+  testProfiles: TestDefinition[];
   sequences: TestSequence[];
   bomTestMapping: Record<BoMComponent, ChamberTypeId[]>;
 }
@@ -90,32 +98,37 @@ export interface Department {
   id: string;
   name: string;
   description: string;
+  projectsPerYear: number;
+  bomsPerProject: number;
+  modulesPerBom: number;
   defaultProjectsPerYear: number;
   defaultBomsPerProject: number;
   defaultModulesPerBom: number;
   standardId: StandardId;
+  color: string;
 }
 
-/** Input for chamber calculation */
+/** Calculation input parameters */
 export interface CalculationInput {
   projects: number;
-  bomsPerProject: number;
-  modulesPerBom: number;
-  testDurationHrs: number;
-  slotsPerChamber: number;
-  workHoursPerYear?: number;
-  realisationRate?: number;
+  boms: number;
+  modules: number;
+  realisationRate: number;
+  workHoursPerYear: number;
 }
 
-/** Result of chamber calculation */
+/** Result of chamber calculation - unified for all consumers */
 export interface CalculationResult {
-  chamberTypeId: ChamberTypeId;
+  chamberType: ChamberTypeId;
   chamberName: string;
-  chambersNeeded: number;
-  chambersRounded: number;
+  slots: number;
   totalTestHours: number;
-  totalCapacityHours: number;
-  utilizationPercent: number;
+  totalTestHrs: number;
+  chambersRequired: number;
+  chambersNeeded: number;
+  utilization: number;
+  utilizationPct: number;
+  bottleneck: boolean;
 }
 
 /** Department calculation result */
@@ -128,19 +141,27 @@ export interface DepartmentResult {
 
 /** BoM change entry */
 export interface BoMChangeEntry {
-  id: string;
   component: BoMComponent;
   changeType: ChangeType;
-  description?: string;
-  projectCount: number;
+  selected: boolean;
+}
+
+/** Reliability test for planner */
+export interface ReliabilityTest {
+  id: string;
+  name: string;
+  chamberType: ChamberTypeId;
+  testHours: number;
+  samplesRequired: number;
+  annualDemand: number;
+  chambersNeeded: number;
 }
 
 /** Global app state */
 export interface AppState {
   selectedStandard: StandardId;
+  calculationInput: CalculationInput;
   departments: Department[];
   bomChanges: BoMChangeEntry[];
-  realisationRate: number;
-  workHoursPerYear: number;
   results: DepartmentResult[];
 }

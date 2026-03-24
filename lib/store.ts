@@ -5,43 +5,54 @@ import { persist } from 'zustand/middleware';
 import {
   AppState,
   BoMChangeEntry,
+  BoMComponent,
+  ChangeType,
   Department,
   DepartmentResult,
   StandardId,
+  CalculationInput,
 } from './types';
 import { DEFAULT_DEPARTMENTS } from './departments';
 import { DEFAULT_WORK_HOURS_PER_YEAR, DEFAULT_REALISATION_RATE } from './chambers';
 
 interface StoreActions {
   setSelectedStandard: (id: StandardId) => void;
+  setCalculationInput: (updates: Partial<CalculationInput>) => void;
   setDepartments: (depts: Department[]) => void;
   addDepartment: (dept: Department) => void;
   updateDepartment: (id: string, updates: Partial<Department>) => void;
   removeDepartment: (id: string) => void;
   setBomChanges: (changes: BoMChangeEntry[]) => void;
-  addBomChange: (change: BoMChangeEntry) => void;
-  removeBomChange: (id: string) => void;
-  setRealisationRate: (rate: number) => void;
-  setWorkHoursPerYear: (hours: number) => void;
+  toggleBoMChange: (component: BoMComponent, changeType: ChangeType) => void;
   setResults: (results: DepartmentResult[]) => void;
   reset: () => void;
 }
 
 const initialState: AppState = {
-  selectedStandard: 'IEC_61215',
+  selectedStandard: 'IEC',
+  calculationInput: {
+    projects: 10,
+    boms: 3,
+    modules: 8,
+    realisationRate: DEFAULT_REALISATION_RATE,
+    workHoursPerYear: DEFAULT_WORK_HOURS_PER_YEAR,
+  },
   departments: DEFAULT_DEPARTMENTS,
   bomChanges: [],
-  realisationRate: DEFAULT_REALISATION_RATE,
-  workHoursPerYear: DEFAULT_WORK_HOURS_PER_YEAR,
   results: [],
 };
 
-export const useStore = create<AppState & StoreActions>()(
+export const useAppStore = create<AppState & StoreActions>()(
   persist(
     (set) => ({
       ...initialState,
 
       setSelectedStandard: (id) => set({ selectedStandard: id }),
+
+      setCalculationInput: (updates) =>
+        set((state) => ({
+          calculationInput: { ...state.calculationInput, ...updates },
+        })),
 
       setDepartments: (depts) => set({ departments: depts }),
 
@@ -62,17 +73,27 @@ export const useStore = create<AppState & StoreActions>()(
 
       setBomChanges: (changes) => set({ bomChanges: changes }),
 
-      addBomChange: (change) =>
-        set((state) => ({ bomChanges: [...state.bomChanges, change] })),
-
-      removeBomChange: (id) =>
-        set((state) => ({
-          bomChanges: state.bomChanges.filter((c) => c.id !== id),
-        })),
-
-      setRealisationRate: (rate) => set({ realisationRate: rate }),
-
-      setWorkHoursPerYear: (hours) => set({ workHoursPerYear: hours }),
+      toggleBoMChange: (component, changeType) =>
+        set((state) => {
+          const existing = state.bomChanges.find(
+            (bc) => bc.component === component && bc.changeType === changeType
+          );
+          if (existing) {
+            return {
+              bomChanges: state.bomChanges.map((bc) =>
+                bc.component === component && bc.changeType === changeType
+                  ? { ...bc, selected: !bc.selected }
+                  : bc
+              ),
+            };
+          }
+          return {
+            bomChanges: [
+              ...state.bomChanges,
+              { component, changeType, selected: true },
+            ],
+          };
+        }),
 
       setResults: (results) => set({ results }),
 
@@ -83,3 +104,6 @@ export const useStore = create<AppState & StoreActions>()(
     }
   )
 );
+
+/** Alias for backward compatibility */
+export const useStore = useAppStore;

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { STANDARDS } from "@/lib/standards";
+import { STANDARDS_MAP } from "@/lib/standards";
 import { CHAMBERS } from "@/lib/chambers";
 import { useAppStore } from "@/lib/store";
 import type { ReliabilityTest } from "@/lib/types";
 
 export default function ReliabilityPlanner() {
   const { selectedStandard, calculationInput } = useAppStore();
-  const standard = STANDARDS[selectedStandard] ?? STANDARDS.IEC;
+  const standard = STANDARDS_MAP[selectedStandard] ?? STANDARDS_MAP.IEC;
 
   const [tests, setTests] = useState<ReliabilityTest[]>(() =>
     standard.tests.map((t) => ({
@@ -24,7 +24,8 @@ export default function ReliabilityPlanner() {
 
   // Recalculate chambers for each test
   const computedTests = tests.map((t) => {
-    const chamber = CHAMBERS[t.chamberType];
+    const chamber = CHAMBERS.find((c) => c.id === t.chamberType);
+    if (!chamber) return { ...t, chambersNeeded: 0 };
     const totalHours = t.annualDemand * t.samplesRequired * t.testHours;
     const capacity =
       chamber.slots * calculationInput.workHoursPerYear * calculationInput.realisationRate;
@@ -67,7 +68,7 @@ export default function ReliabilityPlanner() {
             {computedTests.map((t) => (
               <tr key={t.id} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">{t.name}</td>
-                <td className="px-4 py-3 text-slate-600">{CHAMBERS[t.chamberType].name}</td>
+                <td className="px-4 py-3 text-slate-600">{CHAMBERS.find((c) => c.id === t.chamberType)?.name ?? t.chamberType}</td>
                 <td className="px-4 py-3 text-right text-slate-600">{t.testHours}</td>
                 <td className="px-4 py-3 text-right text-slate-600">{t.samplesRequired}</td>
                 <td className="px-4 py-3 text-center">
