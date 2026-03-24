@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { STANDARDS } from "@/lib/standards";
-import { CHAMBERS } from "@/lib/chambers";
+import { STANDARDS, getStandard } from "@/lib/standards";
+import { getChamber } from "@/lib/chambers";
 import type { StandardId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const TABS: { id: StandardId; label: string }[] = [
-  { id: "IEC", label: "IEC 61215" },
-  { id: "MNRE", label: "MNRE ALMM" },
+  { id: "IEC_61215", label: "IEC 61215" },
+  { id: "MNRE_ALMM", label: "MNRE ALMM" },
   { id: "REC", label: "REC" },
   { id: "Custom", label: "Custom" },
 ];
@@ -17,12 +17,30 @@ const TABS: { id: StandardId; label: string }[] = [
 export default function StandardsConfig() {
   const { selectedStandard, setSelectedStandard } = useAppStore();
   const [activeTab, setActiveTab] = useState<StandardId>(selectedStandard);
-  const standard = STANDARDS[activeTab];
+  const standard = getStandard(activeTab);
 
   const handleTabClick = (id: StandardId) => {
     setActiveTab(id);
     setSelectedStandard(id);
   };
+
+  // Flatten all tests from sequences
+  const allTests = standard
+    ? standard.sequences.flatMap((seq) =>
+        seq.tests.map((t) => {
+          const chamber = getChamber(t.chamberTypeId);
+          return {
+            id: t.id,
+            name: t.name,
+            chamberType: t.chamberTypeId,
+            chamberName: chamber?.name ?? t.chamberTypeId,
+            testHours: chamber?.testDurationHrs ?? 0,
+            samplesRequired: t.modulesRequired,
+            description: t.description || seq.name,
+          };
+        })
+      )
+    : [];
 
   return (
     <div className="space-y-4">
@@ -45,13 +63,15 @@ export default function StandardsConfig() {
       </div>
 
       {/* Standard info */}
-      <div className="rounded-lg bg-blue-50 px-4 py-3">
-        <h3 className="font-semibold text-blue-900">{standard.name}</h3>
-        <p className="mt-0.5 text-sm text-blue-700">{standard.description}</p>
-      </div>
+      {standard && (
+        <div className="rounded-lg bg-blue-50 px-4 py-3">
+          <h3 className="font-semibold text-blue-900">{standard.name}</h3>
+          <p className="mt-0.5 text-sm text-blue-700">{standard.description}</p>
+        </div>
+      )}
 
       {/* Tests table */}
-      {standard.tests.length > 0 ? (
+      {allTests.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -64,10 +84,10 @@ export default function StandardsConfig() {
               </tr>
             </thead>
             <tbody>
-              {standard.tests.map((test) => (
+              {allTests.map((test) => (
                 <tr key={test.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium text-slate-800">{test.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{CHAMBERS[test.chamberType].name}</td>
+                  <td className="px-4 py-3 text-slate-600">{test.chamberName}</td>
                   <td className="px-4 py-3 text-right text-slate-600">{test.testHours}</td>
                   <td className="px-4 py-3 text-right text-slate-600">{test.samplesRequired}</td>
                   <td className="px-4 py-3 text-xs text-slate-500">{test.description}</td>

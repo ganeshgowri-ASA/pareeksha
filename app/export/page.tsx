@@ -3,12 +3,13 @@
 import { FileDown, Printer } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { calculateAllChambers, totalChambersNeeded, averageUtilization } from "@/lib/formulas";
-import { formatNumber, exportCSV } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
+import { exportCSV } from "@/lib/utils";
 
 export default function ExportPage() {
   const { calculationInput, departments, selectedStandard } = useAppStore();
   const results = calculateAllChambers(calculationInput);
-  const activeResults = results.filter((r) => r.chambersRequired > 0);
+  const activeResults = results.filter((r) => r.chambersNeeded > 0);
   const total = totalChambersNeeded(results);
   const avgUtil = averageUtilization(results);
 
@@ -17,9 +18,9 @@ export default function ExportPage() {
     const rows = activeResults.map((r) => [
       r.chamberName,
       String(r.slots),
-      String(r.totalTestHours),
-      String(r.chambersRequired),
-      String(r.utilization),
+      String(r.totalTestHrs),
+      String(r.chambersNeeded),
+      String(r.utilizationPct),
     ]);
     rows.push(["TOTAL", "", "", String(total), String(avgUtil)]);
     exportCSV(headers, rows, "pareeksha-chamber-report.csv");
@@ -105,9 +106,9 @@ export default function ExportPage() {
               <tr key={r.chamberType} className="border-b border-slate-100">
                 <td className="px-3 py-2 text-slate-800">{r.chamberName}</td>
                 <td className="px-3 py-2 text-right text-slate-600">{r.slots}</td>
-                <td className="px-3 py-2 text-right text-slate-600">{formatNumber(r.totalTestHours)}</td>
-                <td className="px-3 py-2 text-right font-semibold text-slate-900">{r.chambersRequired}</td>
-                <td className="px-3 py-2 text-right text-slate-600">{r.utilization}%</td>
+                <td className="px-3 py-2 text-right text-slate-600">{formatNumber(r.totalTestHrs)}</td>
+                <td className="px-3 py-2 text-right font-semibold text-slate-900">{r.chambersNeeded}</td>
+                <td className="px-3 py-2 text-right text-slate-600">{r.utilizationPct}%</td>
               </tr>
             ))}
           </tbody>
@@ -136,11 +137,11 @@ export default function ExportPage() {
             {departments.map((dept) => (
               <tr key={dept.id} className="border-b border-slate-100">
                 <td className="px-3 py-2 text-slate-800">{dept.name}</td>
-                <td className="px-3 py-2 text-right text-slate-600">{dept.projectsPerYear}</td>
-                <td className="px-3 py-2 text-right text-slate-600">{dept.bomsPerProject}</td>
-                <td className="px-3 py-2 text-right text-slate-600">{dept.modulesPerBom}</td>
+                <td className="px-3 py-2 text-right text-slate-600">{dept.defaultProjectsPerYear}</td>
+                <td className="px-3 py-2 text-right text-slate-600">{dept.defaultBomsPerProject}</td>
+                <td className="px-3 py-2 text-right text-slate-600">{dept.defaultModulesPerBom}</td>
                 <td className="px-3 py-2 text-right font-semibold text-slate-900">
-                  {dept.projectsPerYear * dept.bomsPerProject * dept.modulesPerBom}
+                  {dept.defaultProjectsPerYear * dept.defaultBomsPerProject * dept.defaultModulesPerBom}
                 </td>
               </tr>
             ))}

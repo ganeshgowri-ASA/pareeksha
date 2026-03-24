@@ -1,6 +1,7 @@
 import {
   CalculationInput,
   CalculationResult,
+  CalculationInputState,
   ChamberTypeId,
   Department,
   DepartmentResult,
@@ -10,7 +11,6 @@ import { CHAMBERS, DEFAULT_WORK_HOURS_PER_YEAR, DEFAULT_REALISATION_RATE } from 
 
 /**
  * Calculate total test hours for a given configuration.
- * TestHours = Projects × BoMs × Modules × ChamberTestDuration
  */
 export function calcTestHours(
   projects: number,
@@ -37,7 +37,6 @@ export function calcChambersNeeded(input: CalculationInput): number {
 
 /**
  * Calculate utilization percentage for a given number of chambers.
- * Utilization = (TotalTestHours) / (Chambers × Slots × WorkHrs × RealisationRate) × 100
  */
 export function calcUtilization(
   totalTestHours: number,
@@ -64,7 +63,57 @@ export function calcYearlyCapacity(
 }
 
 /**
- * Calculate chamber requirements for a single chamber type.
+ * Calculate chamber requirements for all chamber types given a calculation input.
+ * Used by dashboard, calculator, and export pages.
+ */
+export function calculateAllChambers(input: CalculationInputState): CalculationResult[] {
+  const { projects, boms, modules, realisationRate, workHoursPerYear } = input;
+
+  return CHAMBERS.map((chamber) => {
+    const totalTestHrs = projects * boms * modules * chamber.testDurationHrs;
+    const capacity = chamber.slotsFullSize * workHoursPerYear * realisationRate;
+    const chambersNeeded = capacity > 0 ? Math.ceil(totalTestHrs / capacity) : 0;
+    const utilizationPct =
+      chambersNeeded > 0
+        ? Math.round(
+            (totalTestHrs / (chambersNeeded * chamber.slotsFullSize * workHoursPerYear * realisationRate)) * 10000
+          ) / 100
+        : 0;
+
+    return {
+      chamberType: chamber.id,
+      chamberName: chamber.name,
+      slots: chamber.slotsFullSize,
+      chambersNeeded,
+      chambersRequired: chambersNeeded,
+      totalTestHrs,
+      totalTestHours: totalTestHrs,
+      utilizationPct,
+      utilization: utilizationPct,
+      bottleneck: utilizationPct > 85,
+    };
+  });
+}
+
+/**
+ * Sum up total chambers from results.
+ */
+export function totalChambersNeeded(results: CalculationResult[]): number {
+  return results.reduce((sum, r) => sum + r.chambersNeeded, 0);
+}
+
+/**
+ * Average utilization across active chambers.
+ */
+export function averageUtilization(results: CalculationResult[]): number {
+  const active = results.filter((r) => r.chambersNeeded > 0);
+  if (active.length === 0) return 0;
+  const avg = active.reduce((sum, r) => sum + r.utilizationPct, 0) / active.length;
+  return Math.round(avg * 10) / 10;
+}
+
+/**
+ * Calculate for a single chamber type.
  */
 export function calcForChamberType(
   chamberTypeId: ChamberTypeId,
@@ -77,37 +126,32 @@ export function calcForChamberType(
   const chamber = CHAMBERS.find((c) => c.id === chamberTypeId);
   if (!chamber) return null;
 
-  const input: CalculationInput = {
-    projects,
-    bomsPerProject,
-    modulesPerBom,
-    testDurationHrs: chamber.testDurationHrs,
-    slotsPerChamber: chamber.slotsFullSize,
-    workHoursPerYear,
-    realisationRate,
-  };
-
-  const chambersNeeded = calcChambersNeeded(input);
-  const chambersRounded = Math.ceil(chambersNeeded);
-  const totalTestHours = calcTestHours(projects, bomsPerProject, modulesPerBom, chamber.testDurationHrs);
-  const totalCapacity = calcYearlyCapacity(chambersRounded, chamber.slotsFullSize, workHoursPerYear, realisationRate);
-  const utilization = chambersRounded > 0
-    ? calcUtilization(totalTestHours, chambersRounded, chamber.slotsFullSize, workHoursPerYear, realisationRate)
-    : 0;
+  const totalTestHrs = projects * bomsPerProject * modulesPerBom * chamber.testDurationHrs;
+  const capacity = chamber.slotsFullSize * workHoursPerYear * realisationRate;
+  const chambersNeeded = capacity > 0 ? Math.ceil(totalTestHrs / capacity) : 0;
+  const utilizationPct =
+    chambersNeeded > 0
+      ? Math.round(
+          (totalTestHrs / (chambersNeeded * chamber.slotsFullSize * workHoursPerYear * realisationRate)) * 10000
+        ) / 100
+      : 0;
 
   return {
-    chamberTypeId,
+    chamberType: chamber.id,
     chamberName: chamber.name,
+    slots: chamber.slotsFullSize,
     chambersNeeded,
-    chambersRounded,
-    totalTestHours,
-    totalCapacityHours: totalCapacity,
-    utilizationPercent: Math.round(utilization * 100) / 100,
+    chambersRequired: chambersNeeded,
+    totalTestHrs,
+    totalTestHours: totalTestHrs,
+    utilizationPct,
+    utilization: utilizationPct,
+    bottleneck: utilizationPct > 85,
   };
 }
 
 /**
- * Calculate all chamber requirements for a department based on its standard's test sequences.
+ * Calculate all chamber requirements for departments.
  */
 export function calcAllDepartments(
   departments: Department[],
@@ -126,7 +170,6 @@ export function calcAllDepartments(
       };
     }
 
-    // Collect unique chamber types from the standard's sequences
     const chamberTypeIds = new Set<ChamberTypeId>();
     for (const seq of standard.sequences) {
       for (const test of seq.tests) {
@@ -144,12 +187,12 @@ export function calcAllDepartments(
         workHoursPerYear,
         realisationRate
       );
-      if (result && result.chambersRounded > 0) {
+      if (result && result.chambersNeeded > 0) {
         results.push(result);
       }
     }
 
-    const totalChambers = results.reduce((sum, r) => sum + r.chambersRounded, 0);
+    const totalChambers = results.reduce((sum, r) => sum + r.chambersNeeded, 0);
 
     return {
       departmentId: dept.id,

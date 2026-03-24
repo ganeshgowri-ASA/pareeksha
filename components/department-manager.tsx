@@ -32,9 +32,10 @@ export default function DepartmentManager() {
         id: `dept-${Date.now()}`,
         name: draft.name,
         description: draft.description ?? "",
-        projectsPerYear: draft.projectsPerYear ?? 5,
-        bomsPerProject: draft.bomsPerProject ?? 3,
-        modulesPerBom: draft.modulesPerBom ?? 8,
+        defaultProjectsPerYear: draft.defaultProjectsPerYear ?? 5,
+        defaultBomsPerProject: draft.defaultBomsPerProject ?? 3,
+        defaultModulesPerBom: draft.defaultModulesPerBom ?? 8,
+        standardId: 'IEC_61215',
         color: COLORS[departments.length % COLORS.length],
       });
       setShowAdd(false);
@@ -57,9 +58,9 @@ export default function DepartmentManager() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <input placeholder="Name" value={draft.name ?? ""} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="input-field" />
             <input placeholder="Description" value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className="input-field" />
-            <input type="number" placeholder="Projects/Year" value={draft.projectsPerYear ?? ""} onChange={(e) => setDraft({ ...draft, projectsPerYear: Number(e.target.value) })} className="input-field" />
-            <input type="number" placeholder="BoMs/Project" value={draft.bomsPerProject ?? ""} onChange={(e) => setDraft({ ...draft, bomsPerProject: Number(e.target.value) })} className="input-field" />
-            <input type="number" placeholder="Modules/BoM" value={draft.modulesPerBom ?? ""} onChange={(e) => setDraft({ ...draft, modulesPerBom: Number(e.target.value) })} className="input-field" />
+            <input type="number" placeholder="Projects/Year" value={draft.defaultProjectsPerYear ?? ""} onChange={(e) => setDraft({ ...draft, defaultProjectsPerYear: Number(e.target.value) })} className="input-field" />
+            <input type="number" placeholder="BoMs/Project" value={draft.defaultBomsPerProject ?? ""} onChange={(e) => setDraft({ ...draft, defaultBomsPerProject: Number(e.target.value) })} className="input-field" />
+            <input type="number" placeholder="Modules/BoM" value={draft.defaultModulesPerBom ?? ""} onChange={(e) => setDraft({ ...draft, defaultModulesPerBom: Number(e.target.value) })} className="input-field" />
           </div>
           <div className="mt-3 flex gap-2">
             <button onClick={handleAdd} className="btn-primary"><Check size={16} /> Save</button>
@@ -71,7 +72,7 @@ export default function DepartmentManager() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {departments.map((dept) => (
           <div key={dept.id} className="card relative">
-            <div className="absolute left-0 top-0 h-full w-1 rounded-l-xl" style={{ backgroundColor: dept.color }} />
+            <div className="absolute left-0 top-0 h-full w-1 rounded-l-xl" style={{ backgroundColor: dept.color || COLORS[0] }} />
             {editingId === dept.id ? (
               <div className="space-y-2 pl-3">
                 <input value={draft.name ?? ""} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="input-field text-sm font-semibold" />
@@ -79,15 +80,15 @@ export default function DepartmentManager() {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-xs text-slate-500">Projects</label>
-                    <input type="number" value={draft.projectsPerYear ?? 0} onChange={(e) => setDraft({ ...draft, projectsPerYear: Number(e.target.value) })} className="input-field" />
+                    <input type="number" value={draft.defaultProjectsPerYear ?? 0} onChange={(e) => setDraft({ ...draft, defaultProjectsPerYear: Number(e.target.value) })} className="input-field" />
                   </div>
                   <div>
                     <label className="text-xs text-slate-500">BoMs</label>
-                    <input type="number" value={draft.bomsPerProject ?? 0} onChange={(e) => setDraft({ ...draft, bomsPerProject: Number(e.target.value) })} className="input-field" />
+                    <input type="number" value={draft.defaultBomsPerProject ?? 0} onChange={(e) => setDraft({ ...draft, defaultBomsPerProject: Number(e.target.value) })} className="input-field" />
                   </div>
                   <div>
                     <label className="text-xs text-slate-500">Modules</label>
-                    <input type="number" value={draft.modulesPerBom ?? 0} onChange={(e) => setDraft({ ...draft, modulesPerBom: Number(e.target.value) })} className="input-field" />
+                    <input type="number" value={draft.defaultModulesPerBom ?? 0} onChange={(e) => setDraft({ ...draft, defaultModulesPerBom: Number(e.target.value) })} className="input-field" />
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -113,15 +114,15 @@ export default function DepartmentManager() {
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg bg-slate-50 px-2 py-1.5">
-                    <p className="text-lg font-bold text-slate-900">{dept.projectsPerYear}</p>
+                    <p className="text-lg font-bold text-slate-900">{dept.defaultProjectsPerYear}</p>
                     <p className="text-[10px] text-slate-500">Projects/yr</p>
                   </div>
                   <div className="rounded-lg bg-slate-50 px-2 py-1.5">
-                    <p className="text-lg font-bold text-slate-900">{dept.bomsPerProject}</p>
+                    <p className="text-lg font-bold text-slate-900">{dept.defaultBomsPerProject}</p>
                     <p className="text-[10px] text-slate-500">BoMs/proj</p>
                   </div>
                   <div className="rounded-lg bg-slate-50 px-2 py-1.5">
-                    <p className="text-lg font-bold text-slate-900">{dept.modulesPerBom}</p>
+                    <p className="text-lg font-bold text-slate-900">{dept.defaultModulesPerBom}</p>
                     <p className="text-[10px] text-slate-500">Modules</p>
                   </div>
                 </div>

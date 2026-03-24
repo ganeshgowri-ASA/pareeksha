@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Download, Printer, FileText } from 'lucide-react';
 import { CalculationResult } from '@/lib/types';
 import { CHAMBERS } from '@/lib/chambers';
-import { exportToCSV } from '@/lib/utils';
+import { exportCSV } from '@/lib/utils';
 
 const ALL_COLUMNS = [
   { key: 'chamberType', label: 'Chamber Type' },
@@ -51,7 +51,7 @@ export default function ExportPanel({ results, standardName }: ExportPanelProps)
         return String(r[c.key]);
       })
     );
-    exportToCSV(headers, rows, `pareeksha-${standardName}-results.csv`);
+    exportCSV(headers, rows, `pareeksha-${standardName}-results.csv`);
   };
 
   const handlePrint = () => {
@@ -95,16 +95,16 @@ export default function ExportPanel({ results, standardName }: ExportPanelProps)
     <div className="space-y-6">
       {/* Column selection */}
       <div>
-        <h3 className="text-sm font-semibold text-surface-700 mb-2">Select Columns</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-2">Select Columns</h3>
         <div className="flex flex-wrap gap-2">
           {ALL_COLUMNS.map((col) => (
             <button
               key={col.key}
               onClick={() => toggleColumn(col.key)}
-              className={`px-3 py-1.5 text-xs rounded-full font-medium transition-smooth focus-ring ${
+              className={`px-3 py-1.5 text-xs rounded-full font-medium transition ${
                 selectedColumns.has(col.key)
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-surface-100 text-surface-500 hover:bg-surface-200'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
               }`}
             >
               {col.label}
@@ -117,21 +117,21 @@ export default function ExportPanel({ results, standardName }: ExportPanelProps)
       <div className="flex flex-wrap gap-3">
         <button
           onClick={handleExportCSV}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-smooth focus-ring hover-lift"
+          className="btn-primary"
         >
           <Download size={16} />
           Export CSV
         </button>
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2.5 bg-surface-100 text-surface-700 text-sm font-medium rounded-xl hover:bg-surface-200 transition-smooth focus-ring hover-lift"
+          className="btn-secondary"
         >
           <Printer size={16} />
           Print View
         </button>
         <button
           onClick={handleSummary}
-          className="flex items-center gap-2 px-4 py-2.5 bg-surface-100 text-surface-700 text-sm font-medium rounded-xl hover:bg-surface-200 transition-smooth focus-ring hover-lift"
+          className="btn-secondary"
         >
           <FileText size={16} />
           Download Summary
@@ -140,23 +140,23 @@ export default function ExportPanel({ results, standardName }: ExportPanelProps)
 
       {/* Preview table */}
       {results.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-surface-200">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-surface-50">
+              <tr className="bg-slate-50">
                 {ALL_COLUMNS.filter((c) => selectedColumns.has(c.key)).map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-3 text-left font-semibold text-surface-600"
+                    className="px-4 py-3 text-left font-semibold text-slate-600"
                   >
                     {col.label}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-100">
+            <tbody className="divide-y divide-slate-100">
               {results.map((r) => (
-                <tr key={r.chamberType} className="hover:bg-surface-50 transition-smooth">
+                <tr key={r.chamberType} className="hover:bg-slate-50 transition">
                   {selectedColumns.has('chamberType') && (
                     <td className="px-4 py-3 font-medium">
                       {CHAMBERS.find((c) => c.id === r.chamberType)?.name || r.chamberType}
@@ -201,7 +201,7 @@ export default function ExportPanel({ results, standardName }: ExportPanelProps)
 
       {results.length === 0 && (
         <div className="empty-state">
-          <Download size={32} className="text-surface-300 mb-2" />
+          <Download size={32} className="text-slate-300 mb-2" />
           <p className="text-sm">No results to export.</p>
           <p className="text-xs mt-1">Run calculations first to generate exportable data.</p>
         </div>

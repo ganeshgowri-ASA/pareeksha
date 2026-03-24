@@ -149,3 +149,17 @@ export const STANDARDS: Standard[] = [IEC_61215, MNRE_ALMM, REC];
 export function getStandard(id: string): Standard | undefined {
   return STANDARDS.find((s) => s.id === id);
 }
+
+/** Get all unique tests from a standard's sequences, flattened */
+export function getStandardTests(standard: Standard) {
+  return standard.sequences.flatMap((seq) =>
+    seq.tests.map((t) => ({
+      id: t.id,
+      name: t.name,
+      chamberType: t.chamberTypeId,
+      testHours: 0, // filled from chamber lookup
+      samplesRequired: t.modulesRequired,
+      description: t.description || seq.name,
+    }))
+  );
+}

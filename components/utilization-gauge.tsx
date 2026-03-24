@@ -34,48 +34,46 @@ export default function UtilizationGauge({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        className="transform -rotate-90"
-      >
-        {/* Background circle */}
-        <circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth={strokeWidth}
-        />
-        {/* Progress arc */}
-        <circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference - progress}
-          strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
-        />
-      </svg>
-      <div
-        className="absolute flex flex-col items-center justify-center rounded-full"
-        style={{
-          width: size - strokeWidth * 3,
-          height: size - strokeWidth * 3,
-          backgroundColor: bgColor,
-        }}
-      >
-        <span className="text-2xl font-bold" style={{ color }}>
-          {clampedValue.toFixed(0)}%
-        </span>
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          className="transform -rotate-90"
+        >
+          {/* Background circle */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke="#e2e8f0"
+            strokeWidth={strokeWidth}
+          />
+          {/* Progress arc */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - progress}
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+          />
+        </svg>
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center rounded-full"
+          style={{ backgroundColor: bgColor, margin: strokeWidth * 1.5 }}
+        >
+          <span className="text-2xl font-bold" style={{ color }}>
+            {clampedValue.toFixed(0)}%
+          </span>
+        </div>
       </div>
-      <span className="text-sm font-medium text-surface-600 mt-1">{label}</span>
+      <span className="text-sm font-medium text-slate-600 mt-1">{label}</span>
     </div>
   );
 }

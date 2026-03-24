@@ -11,11 +11,12 @@ const CHAMBER_COLORS: Record<string, string> = {
   HF: 'bg-cyan-500',
   PID: 'bg-purple-500',
   UV: 'bg-amber-500',
-  SM: 'bg-rose-500',
-  ML: 'bg-indigo-500',
+  SaltMist: 'bg-rose-500',
+  MechLoad: 'bg-indigo-500',
   Hail: 'bg-orange-500',
   BDT: 'bg-teal-500',
-  IP: 'bg-pink-500',
+  IPTest: 'bg-pink-500',
+  SandDust: 'bg-lime-500',
 };
 
 interface GanttScheduleProps {
@@ -36,12 +37,12 @@ export default function GanttSchedule({ results }: GanttScheduleProps) {
     <div className="overflow-x-auto">
       <div className="min-w-[800px]">
         {/* Header */}
-        <div className="grid grid-cols-[160px_repeat(12,1fr)] gap-px bg-surface-200 rounded-t-lg">
-          <div className="bg-surface-100 p-2 text-xs font-semibold text-surface-600">
+        <div className="grid grid-cols-[160px_repeat(12,1fr)] gap-px bg-slate-200 rounded-t-lg">
+          <div className="bg-slate-100 p-2 text-xs font-semibold text-slate-600">
             Chamber Type
           </div>
           {MONTHS.map((m) => (
-            <div key={m} className="bg-surface-100 p-2 text-xs font-semibold text-surface-600 text-center">
+            <div key={m} className="bg-slate-100 p-2 text-xs font-semibold text-slate-600 text-center">
               {m}
             </div>
           ))}
@@ -52,19 +53,18 @@ export default function GanttSchedule({ results }: GanttScheduleProps) {
           const chamber = CHAMBERS.find((c) => c.id === result.chamberType);
           if (!chamber) return null;
 
-          // Calculate which months are occupied based on utilization
           const monthsOccupied = Math.round((result.totalTestHrs / WORK_HRS_PER_YEAR) * 12);
           const occupiedMonths = Math.min(monthsOccupied, 12);
-          const colorClass = CHAMBER_COLORS[result.chamberType] || 'bg-gray-500';
+          const colorClass = CHAMBER_COLORS[chamber.category] || CHAMBER_COLORS[result.chamberType] || 'bg-gray-500';
 
           return (
             <div
               key={result.chamberType}
-              className="grid grid-cols-[160px_repeat(12,1fr)] gap-px bg-surface-200"
+              className="grid grid-cols-[160px_repeat(12,1fr)] gap-px bg-slate-200"
             >
-              <div className="bg-white p-2 text-sm font-medium text-surface-700 flex items-center">
+              <div className="bg-white p-2 text-sm font-medium text-slate-700 flex items-center">
                 {chamber.name}
-                <span className="ml-auto text-xs text-surface-400">
+                <span className="ml-auto text-xs text-slate-400">
                   x{result.chambersNeeded}
                 </span>
               </div>
@@ -89,15 +89,15 @@ export default function GanttSchedule({ results }: GanttScheduleProps) {
         })}
 
         {/* Legend */}
-        <div className="bg-white p-3 rounded-b-lg border-t border-surface-200">
+        <div className="bg-white p-3 rounded-b-lg border-t border-slate-200">
           <div className="flex flex-wrap gap-3">
             {results.map((r) => {
               const chamber = CHAMBERS.find((c) => c.id === r.chamberType);
-              const colorClass = CHAMBER_COLORS[r.chamberType] || 'bg-gray-500';
+              const colorClass = CHAMBER_COLORS[chamber?.category ?? ''] || CHAMBER_COLORS[r.chamberType] || 'bg-gray-500';
               return (
                 <div key={r.chamberType} className="flex items-center gap-1.5 text-xs">
                   <div className={`w-3 h-3 rounded-sm ${colorClass}`} />
-                  <span className="text-surface-600">{chamber?.name || r.chamberType}</span>
+                  <span className="text-slate-600">{chamber?.name || r.chamberType}</span>
                 </div>
               );
             })}

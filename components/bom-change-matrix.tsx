@@ -13,7 +13,7 @@ const CHANGE_TYPES: ChangeType[] = [
   "DesignChange", "BOMUpgrade", "Requalification",
 ];
 
-const CHANGE_LABELS: Record<ChangeType, string> = {
+const CHANGE_LABELS: Record<string, string> = {
   NewSupplier: "New Supplier",
   MaterialChange: "Material Change",
   NewFactory: "New Factory",

@@ -1,5 +1,7 @@
 import { Department } from './types';
 
+const COLORS = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0891b2', '#be185d'];
+
 export const DEFAULT_DEPARTMENTS: Department[] = [
   {
     id: 'mfg_qa',
@@ -9,6 +11,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     defaultBomsPerProject: 4,
     defaultModulesPerBom: 8,
     standardId: 'IEC_61215',
+    color: COLORS[0],
   },
   {
     id: 'rnd',
@@ -18,6 +21,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     defaultBomsPerProject: 8,
     defaultModulesPerBom: 10,
     standardId: 'IEC_61215',
+    color: COLORS[1],
   },
   {
     id: 'reliability',
@@ -27,6 +31,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     defaultBomsPerProject: 3,
     defaultModulesPerBom: 12,
     standardId: 'MNRE_ALMM',
+    color: COLORS[2],
   },
   {
     id: 'certification',
@@ -36,6 +41,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     defaultBomsPerProject: 2,
     defaultModulesPerBom: 8,
     standardId: 'MNRE_ALMM',
+    color: COLORS[3],
   },
   {
     id: 'third_party',
@@ -45,6 +51,7 @@ export const DEFAULT_DEPARTMENTS: Department[] = [
     defaultBomsPerProject: 2,
     defaultModulesPerBom: 6,
     standardId: 'IEC_61215',
+    color: COLORS[4],
   },
 ];
 

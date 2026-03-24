@@ -32,19 +32,19 @@ export default function DashboardPage() {
     const catResults = results.filter((r) => r.chamberType.startsWith(cat));
     return {
       name: cat,
-      chambers: catResults.reduce((s, r) => s + r.chambersRequired, 0),
-      hours: catResults.reduce((s, r) => s + r.totalTestHours, 0),
+      chambers: catResults.reduce((s, r) => s + r.chambersNeeded, 0),
+      hours: catResults.reduce((s, r) => s + r.totalTestHrs, 0),
     };
   }).filter((d) => d.chambers > 0);
 
   // Department hours pie data
   const pieData = departments.map((dept, i) => ({
     name: dept.name.length > 20 ? dept.name.slice(0, 18) + "..." : dept.name,
-    value: dept.projectsPerYear * dept.bomsPerProject * dept.modulesPerBom,
+    value: dept.defaultProjectsPerYear * dept.defaultBomsPerProject * dept.defaultModulesPerBom,
     color: PIE_COLORS[i % PIE_COLORS.length],
   }));
 
-  const activeTests = results.filter((r) => r.chambersRequired > 0).length;
+  const activeTests = results.filter((r) => r.chambersNeeded > 0).length;
 
   return (
     <div className="space-y-8">

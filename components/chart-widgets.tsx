@@ -19,7 +19,7 @@ import {
   Radar,
 } from 'recharts';
 import { CalculationResult } from '@/lib/types';
-import { CHAMBERS } from '@/lib/chambers';
+import { CHAMBERS, CHAMBER_CATEGORIES } from '@/lib/chambers';
 import { STANDARDS } from '@/lib/standards';
 
 const COLORS = [
@@ -139,15 +139,25 @@ export function TestHoursPieChart({ results }: TestHoursPieChartProps) {
 }
 
 export function StandardComparisonRadar() {
-  const chamberTypes = ['DH', 'TC', 'HF', 'UV', 'PID', 'SM', 'ML', 'Hail', 'BDT'];
-
-  const data = chamberTypes.map((ct) => {
-    const entry: Record<string, string | number> = { chamber: ct };
+  // Build data from standard sequences - aggregate test duration by category
+  const data = CHAMBER_CATEGORIES.map((cat) => {
+    const entry: Record<string, string | number> = { chamber: cat };
     for (const std of STANDARDS) {
-      const profile = std.testProfiles.find((p) => p.chamberType === ct);
-      entry[std.code] = profile ? profile.durationHrs : 0;
+      let totalHrs = 0;
+      for (const seq of std.sequences) {
+        for (const test of seq.tests) {
+          if (test.chamberTypeId.startsWith(cat)) {
+            const chamber = CHAMBERS.find((c) => c.id === test.chamberTypeId);
+            totalHrs += chamber?.testDurationHrs ?? 0;
+          }
+        }
+      }
+      entry[std.id] = totalHrs;
     }
     return entry;
+  }).filter((d) => {
+    // Only include categories that have data
+    return STANDARDS.some((s) => (d[s.id] as number) > 0);
   });
 
   return (
@@ -156,8 +166,8 @@ export function StandardComparisonRadar() {
         <PolarGrid stroke="#e2e8f0" />
         <PolarAngleAxis dataKey="chamber" tick={{ fontSize: 11 }} />
         <PolarRadiusAxis tick={{ fontSize: 10 }} />
-        <Radar name="IEC" dataKey="IEC" stroke="#2563eb" fill="#2563eb" fillOpacity={0.15} />
-        <Radar name="MNRE" dataKey="MNRE" stroke="#10b981" fill="#10b981" fillOpacity={0.15} />
+        <Radar name="IEC 61215" dataKey="IEC_61215" stroke="#2563eb" fill="#2563eb" fillOpacity={0.15} />
+        <Radar name="MNRE ALMM" dataKey="MNRE_ALMM" stroke="#10b981" fill="#10b981" fillOpacity={0.15} />
         <Radar name="REC" dataKey="REC" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} />
         <Tooltip
           contentStyle={{

@@ -43,6 +43,7 @@ export type BoMComponent =
 export type ChangeType =
   | 'NewSupplier'
   | 'MaterialChange'
+  | 'NewFactory'
   | 'NewFactoryLine'
   | 'DesignChange'
   | 'BOMUpgrade'
@@ -94,6 +95,7 @@ export interface Department {
   defaultBomsPerProject: number;
   defaultModulesPerBom: number;
   standardId: StandardId;
+  color?: string;
 }
 
 /** Input for chamber calculation */
@@ -107,15 +109,18 @@ export interface CalculationInput {
   realisationRate?: number;
 }
 
-/** Result of chamber calculation */
+/** Unified calculation result used across all components */
 export interface CalculationResult {
-  chamberTypeId: ChamberTypeId;
+  chamberType: string;
   chamberName: string;
+  slots: number;
   chambersNeeded: number;
-  chambersRounded: number;
+  chambersRequired: number;
+  totalTestHrs: number;
   totalTestHours: number;
-  totalCapacityHours: number;
-  utilizationPercent: number;
+  utilizationPct: number;
+  utilization: number;
+  bottleneck: boolean;
 }
 
 /** Department calculation result */
@@ -133,6 +138,27 @@ export interface BoMChangeEntry {
   changeType: ChangeType;
   description?: string;
   projectCount: number;
+  selected: boolean;
+}
+
+/** Reliability test entry for planner */
+export interface ReliabilityTest {
+  id: string;
+  name: string;
+  chamberType: string;
+  testHours: number;
+  samplesRequired: number;
+  annualDemand: number;
+  chambersNeeded: number;
+}
+
+/** Global calculation input state */
+export interface CalculationInputState {
+  projects: number;
+  boms: number;
+  modules: number;
+  realisationRate: number;
+  workHoursPerYear: number;
 }
 
 /** Global app state */
@@ -143,4 +169,5 @@ export interface AppState {
   realisationRate: number;
   workHoursPerYear: number;
   results: DepartmentResult[];
+  calculationInput: CalculationInputState;
 }
