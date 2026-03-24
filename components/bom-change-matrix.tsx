@@ -1,19 +1,19 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import type { BoMComponent, ChangeType } from "@/lib/types";
+import type { BoMComponentId, ChangeTypeId } from "@/lib/types";
 
-const BOM_COMPONENTS: BoMComponent[] = [
+const BOM_COMPONENTS: BoMComponentId[] = [
   "Glass", "Encapsulant", "Cell", "Frame", "JunctionBox",
   "Backsheet", "Foil", "Wafer", "Ribbon", "Sealant", "Potting",
 ];
 
-const CHANGE_TYPES: ChangeType[] = [
+const CHANGE_TYPES: ChangeTypeId[] = [
   "NewSupplier", "MaterialChange", "NewFactory",
   "DesignChange", "BOMUpgrade", "Requalification",
 ];
 
-const CHANGE_LABELS: Record<ChangeType, string> = {
+const CHANGE_LABELS: Record<ChangeTypeId, string> = {
   NewSupplier: "New Supplier",
   MaterialChange: "Material Change",
   NewFactory: "New Factory",
@@ -25,7 +25,7 @@ const CHANGE_LABELS: Record<ChangeType, string> = {
 export default function BoMChangeMatrix() {
   const { bomChanges, toggleBoMChange } = useAppStore();
 
-  const isSelected = (component: BoMComponent, changeType: ChangeType) =>
+  const isSelected = (component: BoMComponentId, changeType: ChangeTypeId) =>
     bomChanges.find(
       (bc) => bc.component === component && bc.changeType === changeType
     )?.selected ?? false;

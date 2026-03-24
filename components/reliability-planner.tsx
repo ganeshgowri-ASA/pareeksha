@@ -4,7 +4,7 @@ import { useState } from "react";
 import { STANDARDS_MAP } from "@/lib/standards";
 import { CHAMBERS } from "@/lib/chambers";
 import { useAppStore } from "@/lib/store";
-import type { ReliabilityTest } from "@/lib/types";
+import { CHAMBERS } from "@/lib/chambers";
 
 export default function ReliabilityPlanner() {
   const { selectedStandard, calculationInput } = useAppStore();
@@ -45,7 +45,7 @@ export default function ReliabilityPlanner() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          Standard: <strong>{standard.name}</strong> &mdash; {computedTests.length} tests
+          Standard: <strong>{selectedStandard.name}</strong> &mdash; {selectedStandard.testProfiles.length} tests
         </p>
         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
           {totalChambers} chambers total
@@ -59,8 +59,7 @@ export default function ReliabilityPlanner() {
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Test</th>
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Chamber</th>
               <th className="px-4 py-3 text-right font-semibold text-slate-700">Hours</th>
-              <th className="px-4 py-3 text-right font-semibold text-slate-700">Samples</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-700">Annual Demand</th>
+              <th className="px-4 py-3 text-right font-semibold text-slate-700">Modules</th>
               <th className="px-4 py-3 text-right font-semibold text-slate-700">Chambers</th>
             </tr>
           </thead>
@@ -93,7 +92,7 @@ export default function ReliabilityPlanner() {
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-slate-300 bg-slate-50">
-              <td className="px-4 py-3 font-bold text-slate-900" colSpan={5}>Total Chambers</td>
+              <td className="px-4 py-3 font-bold text-slate-900" colSpan={4}>Total Chambers</td>
               <td className="px-4 py-3 text-right">
                 <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-sm font-bold text-emerald-700">
                   {totalChambers}
