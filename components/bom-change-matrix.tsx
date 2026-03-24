@@ -1,33 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { AlertTriangle, CheckCircle, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-import { getStandard } from "@/lib/standards";
+import { getStandard, getComponentsByCategory, BOM_COMPONENT_INFO } from "@/lib/standards";
 import { getChamber } from "@/lib/chambers";
-import type { BoMComponent, ChangeType, ChamberTypeId } from "@/lib/types";
+import type { BoMComponent, BoMCategory, ChangeType, ChamberTypeId, IEC62915Edition } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const BOM_COMPONENTS: BoMComponent[] = [
-  "Glass", "Encapsulant", "Cell", "Frame", "JunctionBox",
-  "Backsheet", "Foil", "Wafer", "Ribbon", "Sealant", "Potting",
-];
 
 const CHANGE_TYPES: ChangeType[] = [
   "NewSupplier", "MaterialChange", "NewFactory",
   "DesignChange", "BOMUpgrade", "Requalification",
 ];
 
-const CHANGE_LABELS: Record<ChangeType, string> = {
+const CHANGE_LABELS: Record<string, string> = {
   NewSupplier: "New Supplier",
   MaterialChange: "Material Change",
   NewFactory: "New Factory",
   DesignChange: "Design Change",
   BOMUpgrade: "BOM Upgrade",
   Requalification: "Requalification",
+  ThicknessChange: "Thickness Change",
+  DimensionChange: "Dimension Change",
+  ProcessChange: "Process Change",
 };
 
-const SEVERITY: Record<ChangeType, { level: "low" | "medium" | "high"; color: string; label: string }> = {
+const SEVERITY: Record<string, { level: "low" | "medium" | "high"; color: string; label: string }> = {
   NewSupplier: { level: "medium", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300", label: "Medium" },
   MaterialChange: { level: "high", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300", label: "High" },
   NewFactory: { level: "medium", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300", label: "Medium" },
@@ -36,14 +34,41 @@ const SEVERITY: Record<ChangeType, { level: "low" | "medium" | "high"; color: st
   Requalification: { level: "high", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300", label: "High" },
 };
 
+const CATEGORY_LABELS: Record<BoMCategory, string> = {
+  Frontsheet: 'Frontsheet',
+  Encapsulation: 'Encapsulation',
+  CellAssembly: 'Cell Assembly',
+  Backside: 'Backside',
+  Electrical: 'Electrical',
+  Mechanical: 'Mechanical',
+  DesignLayout: 'Design / Layout',
+};
+
+const CATEGORY_COLORS: Record<BoMCategory, string> = {
+  Frontsheet: 'bg-sky-50 text-sky-800 dark:bg-sky-900/20 dark:text-sky-300',
+  Encapsulation: 'bg-violet-50 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300',
+  CellAssembly: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300',
+  Backside: 'bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300',
+  Electrical: 'bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+  Mechanical: 'bg-orange-50 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
+  DesignLayout: 'bg-pink-50 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300',
+};
+
 export default function BoMChangeMatrix() {
   const { bomChanges, toggleBoMChange, selectedStandard } = useAppStore();
   const [showSequences, setShowSequences] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [edition, setEdition] = useState<IEC62915Edition>('2023');
 
   useEffect(() => setMounted(true), []);
 
   const standard = getStandard(selectedStandard);
+  const groupedComponents = getComponentsByCategory();
+
+  // Filter components based on edition
+  const filteredComponents = BOM_COMPONENT_INFO.filter(
+    (c) => edition === '2023' ? c.in2023 : c.in2018
+  );
 
   const isSelected = (component: BoMComponent, changeType: ChangeType) =>
     bomChanges.find(
@@ -70,13 +95,41 @@ export default function BoMChangeMatrix() {
 
   if (!mounted) return null;
 
+  // Build ordered category list
+  const categories: BoMCategory[] = ['Frontsheet', 'Encapsulation', 'CellAssembly', 'Backside', 'Electrical', 'Mechanical', 'DesignLayout'];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Select BoM changes that require qualification testing
         </p>
         <div className="flex items-center gap-3">
+          {/* Edition selector */}
+          <div className="flex gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
+            <button
+              onClick={() => setEdition('2018')}
+              className={cn(
+                "rounded-md px-3 py-1 text-xs font-medium transition-all",
+                edition === '2018'
+                  ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400"
+              )}
+            >
+              IEC 62915:2018
+            </button>
+            <button
+              onClick={() => setEdition('2023')}
+              className={cn(
+                "rounded-md px-3 py-1 text-xs font-medium transition-all",
+                edition === '2023'
+                  ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400"
+              )}
+            >
+              IEC 62915:2023
+            </button>
+          </div>
           {/* Severity legend */}
           <div className="hidden sm:flex items-center gap-2 text-xs">
             <span className="flex items-center gap-1 rounded px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
@@ -92,7 +145,7 @@ export default function BoMChangeMatrix() {
         </div>
       </div>
 
-      {/* Matrix Table */}
+      {/* Matrix Table grouped by category */}
       <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
         <table className="w-full text-sm">
           <thead>
@@ -104,53 +157,77 @@ export default function BoMChangeMatrix() {
                 <th key={ct} className="px-3 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">
                   <div className="flex flex-col items-center gap-1">
                     <span>{CHANGE_LABELS[ct]}</span>
-                    <span className={cn("text-[10px] rounded px-1.5 py-0.5", SEVERITY[ct].color)}>
-                      {SEVERITY[ct].label}
-                    </span>
+                    {SEVERITY[ct] && (
+                      <span className={cn("text-[10px] rounded px-1.5 py-0.5", SEVERITY[ct].color)}>
+                        {SEVERITY[ct].label}
+                      </span>
+                    )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {BOM_COMPONENTS.map((comp) => {
-              const compSelected = bomChanges.some(
-                (bc) => bc.component === comp && bc.selected
+            {categories.map((cat) => {
+              const comps = (groupedComponents[cat] || []).filter(
+                (c) => edition === '2023' ? c.in2023 : c.in2018
               );
+              if (comps.length === 0) return null;
               return (
-                <tr
-                  key={comp}
-                  className={cn(
-                    "border-b border-slate-100 dark:border-slate-700 transition-colors",
-                    compSelected
-                      ? "bg-blue-50/50 dark:bg-blue-900/10"
-                      : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                  )}
-                >
-                  <td className={cn(
-                    "sticky left-0 px-4 py-3 font-medium z-10",
-                    compSelected
-                      ? "bg-blue-50/50 dark:bg-blue-900/10 text-blue-900 dark:text-blue-200"
-                      : "bg-white dark:bg-slate-800/50 text-slate-800 dark:text-slate-200"
-                  )}>
-                    <div className="flex items-center gap-2">
-                      {compSelected && <CheckCircle size={14} className="text-blue-500" />}
-                      {comp === "JunctionBox" ? "Junction Box" : comp}
-                    </div>
-                  </td>
-                  {CHANGE_TYPES.map((ct) => (
-                    <td key={ct} className="px-3 py-3 text-center">
-                      <label className="inline-flex cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={isSelected(comp, ct)}
-                          onChange={() => toggleBoMChange(comp, ct)}
-                          className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                      </label>
+                <Fragment key={cat}>
+                  {/* Category header row */}
+                  <tr>
+                    <td
+                      colSpan={CHANGE_TYPES.length + 1}
+                      className="px-4 py-2 bg-slate-50/50 dark:bg-slate-800/30"
+                    >
+                      <span className={cn("rounded px-2 py-0.5 text-xs font-semibold", CATEGORY_COLORS[cat])}>
+                        {CATEGORY_LABELS[cat]}
+                      </span>
                     </td>
-                  ))}
-                </tr>
+                  </tr>
+                  {comps.map((compInfo) => {
+                    const comp = compInfo.id;
+                    const compSelected = bomChanges.some(
+                      (bc) => bc.component === comp && bc.selected
+                    );
+                    return (
+                      <tr
+                        key={comp}
+                        className={cn(
+                          "border-b border-slate-100 dark:border-slate-700 transition-colors",
+                          compSelected
+                            ? "bg-blue-50/50 dark:bg-blue-900/10"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                        )}
+                      >
+                        <td className={cn(
+                          "sticky left-0 px-4 py-3 font-medium z-10",
+                          compSelected
+                            ? "bg-blue-50/50 dark:bg-blue-900/10 text-blue-900 dark:text-blue-200"
+                            : "bg-white dark:bg-slate-800/50 text-slate-800 dark:text-slate-200"
+                        )}>
+                          <div className="flex items-center gap-2">
+                            {compSelected && <CheckCircle size={14} className="text-blue-500" />}
+                            {compInfo.name}
+                          </div>
+                        </td>
+                        {CHANGE_TYPES.map((ct) => (
+                          <td key={ct} className="px-3 py-3 text-center">
+                            <label className="inline-flex cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isSelected(comp, ct)}
+                                onChange={() => toggleBoMChange(comp, ct)}
+                                className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                              />
+                            </label>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </Fragment>
               );
             })}
           </tbody>
@@ -222,3 +299,4 @@ export default function BoMChangeMatrix() {
     </div>
   );
 }
+
