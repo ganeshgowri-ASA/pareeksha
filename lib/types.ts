@@ -28,48 +28,36 @@ export interface ChamberType {
 
 /** BoM component identifiers */
 export type BoMComponent =
-  | 'Glass'
-  | 'Encapsulant'
-  | 'Cell'
-  | 'Frame'
-  | 'JunctionBox'
-  | 'Backsheet'
-  | 'Foil'
-  | 'Wafer'
-  | 'Ribbon'
-  | 'Sealant'
-  | 'Potting';
+  | 'Glass' | 'Encapsulant' | 'Cell' | 'Frame' | 'JunctionBox'
+  | 'Backsheet' | 'Foil' | 'Wafer' | 'Ribbon' | 'Sealant' | 'Potting';
 
 /** Change type identifiers */
 export type ChangeType =
-  | 'NewSupplier'
-  | 'MaterialChange'
-  | 'NewFactory'
-  | 'DesignChange'
-  | 'BOMUpgrade'
-  | 'Requalification';
+  | 'NewSupplier' | 'MaterialChange' | 'NewFactory'
+  | 'DesignChange' | 'BOMUpgrade' | 'Requalification';
 
 /** Standard identifiers */
 export type StandardId = 'IEC' | 'MNRE' | 'REC' | 'Custom';
 
-/** Test definition within a standard */
-export interface TestDefinition {
+/** Test profile within a standard */
+export interface TestProfile {
   id: string;
   name: string;
   chamberType: ChamberTypeId;
-  chamberTypeId: ChamberTypeId;
   testHours: number;
   samplesRequired: number;
-  modulesRequired: number;
+  description: string;
+  /** Alias for testHours (DARSHANA compat) */
   durationHrs: number;
-  description?: string;
+  /** Alias for samplesRequired (DARSHANA compat) */
+  modulesRequired: number;
 }
 
-/** Test sequence for a standard */
+/** Test sequence grouping */
 export interface TestSequence {
   id: string;
   name: string;
-  tests: TestDefinition[];
+  tests: { id: string; name: string; chamberTypeId: ChamberTypeId; modulesRequired: number }[];
 }
 
 /** Standard profile with test mappings */
@@ -78,19 +66,11 @@ export interface Standard {
   code: string;
   name: string;
   description: string;
-  tests: TestDefinition[];
-  testProfiles: TestDefinition[];
+  tests: TestProfile[];
+  /** Alias for tests (DARSHANA compat) */
+  testProfiles: TestProfile[];
   sequences: TestSequence[];
   bomTestMapping: Record<BoMComponent, ChamberTypeId[]>;
-}
-
-/** Test profile (subset of tests for a specific purpose) */
-export interface TestProfile {
-  id: string;
-  name: string;
-  standardId: StandardId;
-  selectedTests: string[];
-  description?: string;
 }
 
 /** Department definition */
@@ -101,14 +81,18 @@ export interface Department {
   projectsPerYear: number;
   bomsPerProject: number;
   modulesPerBom: number;
-  defaultProjectsPerYear: number;
-  defaultBomsPerProject: number;
-  defaultModulesPerBom: number;
   standardId: StandardId;
-  color: string;
+  color?: string;
 }
 
-/** Calculation input parameters */
+/** BoM change entry */
+export interface BoMChange {
+  component: BoMComponent;
+  changeType: ChangeType;
+  selected: boolean;
+}
+
+/** Calculation input */
 export interface CalculationInput {
   projects: number;
   boms: number;
@@ -117,16 +101,19 @@ export interface CalculationInput {
   workHoursPerYear: number;
 }
 
-/** Result of chamber calculation - unified for all consumers */
+/** Unified calculation result */
 export interface CalculationResult {
   chamberType: ChamberTypeId;
   chamberName: string;
   slots: number;
   totalTestHours: number;
+  /** Alias for totalTestHours (DARSHANA compat) */
   totalTestHrs: number;
   chambersRequired: number;
+  /** Alias for chambersRequired (DARSHANA compat) */
   chambersNeeded: number;
   utilization: number;
+  /** Alias for utilization (DARSHANA compat) */
   utilizationPct: number;
   bottleneck: boolean;
 }
@@ -139,14 +126,7 @@ export interface DepartmentResult {
   totalChambers: number;
 }
 
-/** BoM change entry */
-export interface BoMChangeEntry {
-  component: BoMComponent;
-  changeType: ChangeType;
-  selected: boolean;
-}
-
-/** Reliability test for planner */
+/** Reliability test entry */
 export interface ReliabilityTest {
   id: string;
   name: string;
@@ -162,6 +142,5 @@ export interface AppState {
   selectedStandard: StandardId;
   calculationInput: CalculationInput;
   departments: Department[];
-  bomChanges: BoMChangeEntry[];
-  results: DepartmentResult[];
+  bomChanges: BoMChange[];
 }

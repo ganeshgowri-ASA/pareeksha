@@ -19,8 +19,8 @@ export function formatPercent(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 
-/** Export data as CSV (headers + rows variant used by SHILPA export page) */
-export function exportCSV(
+/** Export data as CSV and trigger download */
+export function exportToCSV(
   headers: string[],
   rows: string[][],
   filename: string = 'export.csv'
@@ -54,33 +54,5 @@ export function exportCSV(
   URL.revokeObjectURL(url);
 }
 
-/** Export data as CSV (record variant used by DARSHANA export panel) */
-export function exportToCSV(
-  headersOrData: string[] | Record<string, string | number>[],
-  rowsOrFilename?: string[][] | string,
-  filename?: string
-): void {
-  // If first arg is an array of strings (headers), use headers+rows format
-  if (
-    Array.isArray(headersOrData) &&
-    headersOrData.length > 0 &&
-    typeof headersOrData[0] === 'string'
-  ) {
-    exportCSV(
-      headersOrData as string[],
-      (rowsOrFilename as string[][]) || [],
-      filename || 'export.csv'
-    );
-    return;
-  }
-
-  // Otherwise treat as record-based format
-  const data = headersOrData as Record<string, string | number>[];
-  if (data.length === 0) return;
-
-  const headers = Object.keys(data[0]);
-  const rows = data.map((row) =>
-    headers.map((h) => String(row[h] ?? ''))
-  );
-  exportCSV(headers, rows, (rowsOrFilename as string) || 'export.csv');
-}
+/** Alias for backward compatibility */
+export const exportCSV = exportToCSV;

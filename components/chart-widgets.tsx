@@ -18,8 +18,8 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
-import { CalculationResult } from '@/lib/types';
-import { CHAMBERS } from '@/lib/chambers';
+import { CalculationResult, ChamberCategory } from '@/lib/types';
+import { CHAMBERS, CHAMBER_CATEGORIES } from '@/lib/chambers';
 import { STANDARDS } from '@/lib/standards';
 
 const COLORS = [
@@ -139,13 +139,19 @@ export function TestHoursPieChart({ results }: TestHoursPieChartProps) {
 }
 
 export function StandardComparisonRadar() {
-  const chamberTypes = ['DH', 'TC', 'HF', 'UV', 'PID', 'SM', 'ML', 'Hail', 'BDT'];
+  const categories: ChamberCategory[] = ['DH', 'TC', 'HF', 'UV', 'PID', 'SaltMist', 'MechLoad', 'Hail', 'BDT'];
 
-  const data = chamberTypes.map((ct) => {
-    const entry: Record<string, string | number> = { chamber: ct };
+  const data = categories.map((cat) => {
+    const entry: Record<string, string | number> = { chamber: cat };
     for (const std of STANDARDS) {
-      const profile = std.testProfiles.find((p) => p.chamberType === ct);
-      entry[std.code] = profile ? profile.durationHrs : 0;
+      // Sum test hours for all tests in this category
+      const totalHrs = std.testProfiles
+        .filter((p) => {
+          const chamber = CHAMBERS.find((c) => c.id === p.chamberType);
+          return chamber?.category === cat;
+        })
+        .reduce((sum, p) => sum + p.durationHrs, 0);
+      entry[std.code] = totalHrs;
     }
     return entry;
   });

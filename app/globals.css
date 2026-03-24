@@ -18,7 +18,7 @@
   --color-warning: #f59e0b;
   --sidebar-width: 260px;
   --header-height: 64px;
-  /* DARSHANA shorthand aliases */
+  /* Aliases for DARSHANA components */
   --primary: #2563eb;
   --primary-light: #3b82f6;
   --accent: #10b981;
@@ -38,10 +38,6 @@
   --color-text: #f8fafc;
   --color-text-muted: #94a3b8;
   --color-border: #334155;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 @layer base {

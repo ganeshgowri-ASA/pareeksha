@@ -4,11 +4,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
   AppState,
-  BoMChangeEntry,
+  BoMChange,
   BoMComponent,
+  CalculationInput,
   ChangeType,
   Department,
-  DepartmentResult,
   StandardId,
   CalculationInput,
 } from './types';
@@ -17,14 +17,12 @@ import { DEFAULT_WORK_HOURS_PER_YEAR, DEFAULT_REALISATION_RATE } from './chamber
 
 interface StoreActions {
   setSelectedStandard: (id: StandardId) => void;
-  setCalculationInput: (updates: Partial<CalculationInput>) => void;
+  setCalculationInput: (partial: Partial<CalculationInput>) => void;
   setDepartments: (depts: Department[]) => void;
   addDepartment: (dept: Department) => void;
   updateDepartment: (id: string, updates: Partial<Department>) => void;
   removeDepartment: (id: string) => void;
-  setBomChanges: (changes: BoMChangeEntry[]) => void;
   toggleBoMChange: (component: BoMComponent, changeType: ChangeType) => void;
-  setResults: (results: DepartmentResult[]) => void;
   reset: () => void;
 }
 
@@ -32,14 +30,13 @@ const initialState: AppState = {
   selectedStandard: 'IEC',
   calculationInput: {
     projects: 10,
-    boms: 3,
+    boms: 4,
     modules: 8,
     realisationRate: DEFAULT_REALISATION_RATE,
     workHoursPerYear: DEFAULT_WORK_HOURS_PER_YEAR,
   },
   departments: DEFAULT_DEPARTMENTS,
   bomChanges: [],
-  results: [],
 };
 
 export const useAppStore = create<AppState & StoreActions>()(
@@ -49,9 +46,9 @@ export const useAppStore = create<AppState & StoreActions>()(
 
       setSelectedStandard: (id) => set({ selectedStandard: id }),
 
-      setCalculationInput: (updates) =>
+      setCalculationInput: (partial) =>
         set((state) => ({
-          calculationInput: { ...state.calculationInput, ...updates },
+          calculationInput: { ...state.calculationInput, ...partial },
         })),
 
       setDepartments: (depts) => set({ departments: depts }),
@@ -71,31 +68,23 @@ export const useAppStore = create<AppState & StoreActions>()(
           departments: state.departments.filter((d) => d.id !== id),
         })),
 
-      setBomChanges: (changes) => set({ bomChanges: changes }),
-
       toggleBoMChange: (component, changeType) =>
         set((state) => {
-          const existing = state.bomChanges.find(
-            (bc) => bc.component === component && bc.changeType === changeType
+          const idx = state.bomChanges.findIndex(
+            (b) => b.component === component && b.changeType === changeType
           );
-          if (existing) {
-            return {
-              bomChanges: state.bomChanges.map((bc) =>
-                bc.component === component && bc.changeType === changeType
-                  ? { ...bc, selected: !bc.selected }
-                  : bc
-              ),
-            };
+          if (idx >= 0) {
+            const updated = [...state.bomChanges];
+            updated[idx] = { ...updated[idx], selected: !updated[idx].selected };
+            return { bomChanges: updated };
           }
           return {
             bomChanges: [
               ...state.bomChanges,
-              { component, changeType, selected: true },
+              { component, changeType, selected: true } as BoMChange,
             ],
           };
         }),
-
-      setResults: (results) => set({ results }),
 
       reset: () => set(initialState),
     }),
@@ -105,5 +94,5 @@ export const useAppStore = create<AppState & StoreActions>()(
   )
 );
 
-/** Alias for backward compatibility */
+/** Backward-compatible alias */
 export const useStore = useAppStore;
