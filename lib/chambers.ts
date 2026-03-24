@@ -124,15 +124,23 @@ export const CHAMBERS: ChamberType[] = [
   { id: 'MechLoad', category: 'MechLoad', name: 'Mechanical Load', description: 'IEC 62782 static/dynamic mechanical load', slots: 1, slotsFullSize: 1, slotsMiniModule: 1, testDurationHrs: 8 },
   // Hail
   { id: 'Hail', category: 'Hail', name: 'Hail Impact', description: 'IEC 61215 hail impact test', slots: 1, slotsFullSize: 1, slotsMiniModule: 1, testDurationHrs: 4 },
+  // Dynamic Mechanical Load
+  { id: 'DynMechLoad', category: 'DynMechLoad', name: 'Dynamic Mechanical Load', description: 'IEC 62782 dynamic mechanical load test (1000 cycles)', slots: 1, slotsFullSize: 1, slotsMiniModule: 1, testDurationHrs: 8 },
   // Bypass Diode Test
   { id: 'BDT', category: 'BDT', name: 'Bypass Diode Thermal', description: 'Bypass diode thermal test', slots: 4, slotsFullSize: 4, slotsMiniModule: 4, testDurationHrs: 24 },
   // IP Test
   { id: 'IPTest', category: 'IPTest', name: 'IP Rating Test', description: 'Ingress protection rating test', slots: 2, slotsFullSize: 2, slotsMiniModule: 2, testDurationHrs: 8 },
+  // PID 96h
+  { id: 'PID96', category: 'PID', name: 'PID 96h', description: 'Potential Induced Degradation 96 hours (IEC 62804)', slots: 20, slotsFullSize: 20, slotsMiniModule: 20, testDurationHrs: 96 },
+  // Hot Spot Endurance
+  { id: 'HotSpot', category: 'HotSpot', name: 'Hot Spot Endurance', description: 'Hot spot endurance test per IEC 61215 MQT 09', slots: 2, slotsFullSize: 2, slotsMiniModule: 2, testDurationHrs: 5 },
+  // Reverse Current Overload
+  { id: 'ReverseCurrentOverload', category: 'ReverseCurrentOverload', name: 'Reverse Current Overload', description: 'Reverse current overload test for bypass diode / junction box', slots: 4, slotsFullSize: 4, slotsMiniModule: 4, testDurationHrs: 4 },
 ];
 
 /** Unique chamber categories */
 export const CHAMBER_CATEGORIES: ChamberCategory[] = [
-  'DH', 'TC', 'HF', 'PID', 'UV', 'SaltMist', 'SandDust', 'MechLoad', 'Hail', 'BDT', 'IPTest',
+  'DH', 'TC', 'HF', 'PID', 'UV', 'SaltMist', 'SandDust', 'MechLoad', 'DynMechLoad', 'Hail', 'BDT', 'IPTest', 'HotSpot', 'ReverseCurrentOverload',
 ];
 
 /** Look up a chamber by ID */

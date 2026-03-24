@@ -3,23 +3,47 @@
 import { useState } from "react";
 import { CheckCircle, Circle, ArrowLeftRight } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-import { STANDARDS, getStandard, IEC, MNRE, REC } from "@/lib/standards";
+import { STANDARDS, getStandard, IEC, MNRE, BIS, IEC62915_RETEST_MATRIX, BOM_COMPONENT_INFO } from "@/lib/standards";
 import { getChamber, CHAMBER_CATEGORIES } from "@/lib/chambers";
-import type { StandardId } from "@/lib/types";
+import type { StandardId, IEC62915Edition } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const TABS = STANDARDS.map((s) => ({ id: s.id, label: s.name }));
+const MAIN_TABS: { id: StandardId; label: string }[] = [
+  { id: 'IEC', label: 'IEC 61215' },
+  { id: 'MNRE', label: 'MNRE ALMM' },
+  { id: 'IEC62915_2018', label: 'IEC 62915 Retesting' },
+  { id: 'BIS', label: 'BIS IS 14286' },
+  { id: 'Custom', label: 'Custom' },
+];
 
 export default function StandardsConfig() {
   const { selectedStandard, setSelectedStandard } = useAppStore();
   const [activeTab, setActiveTab] = useState<StandardId>(selectedStandard);
   const [showComparison, setShowComparison] = useState(false);
   const [showMatrix, setShowMatrix] = useState(false);
-  const standard = getStandard(activeTab);
+  const [retestEdition, setRetestEdition] = useState<IEC62915Edition>('2023');
+
+  const isRetestTab = activeTab === 'IEC62915_2018' || activeTab === 'IEC62915_2023';
+  const effectiveTab = isRetestTab
+    ? (retestEdition === '2018' ? 'IEC62915_2018' : 'IEC62915_2023') as StandardId
+    : activeTab;
+  const standard = getStandard(effectiveTab);
 
   const handleTabClick = (id: StandardId) => {
-    setActiveTab(id);
-    setSelectedStandard(id);
+    if (id === 'IEC62915_2018') {
+      setActiveTab(id);
+      const effectiveId = retestEdition === '2018' ? 'IEC62915_2018' : 'IEC62915_2023';
+      setSelectedStandard(effectiveId as StandardId);
+    } else {
+      setActiveTab(id);
+      setSelectedStandard(id);
+    }
+  };
+
+  const handleEditionToggle = (edition: IEC62915Edition) => {
+    setRetestEdition(edition);
+    const effectiveId = edition === '2018' ? 'IEC62915_2018' : 'IEC62915_2023';
+    setSelectedStandard(effectiveId as StandardId);
   };
 
   // Compliance checklist
@@ -35,20 +59,20 @@ export default function StandardsConfig() {
     ? Math.round((checkedTests.size / standard.tests.length) * 100)
     : 0;
 
-  // Comparison data
-  const compStandards = [IEC, MNRE, REC];
+  // Comparison data (IEC, MNRE, BIS)
+  const compStandards = [IEC, MNRE, BIS];
 
   return (
     <div className="space-y-6">
       {/* Tabs */}
       <div className="flex gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
-        {TABS.map((tab) => (
+        {MAIN_TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
             className={cn(
               "flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
-              activeTab === tab.id
+              (activeTab === tab.id || (isRetestTab && tab.id === 'IEC62915_2018'))
                 ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             )}
@@ -58,6 +82,32 @@ export default function StandardsConfig() {
         ))}
       </div>
 
+      {/* IEC 62915 Edition Toggle */}
+      {isRetestTab && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Edition:</span>
+          <div className="flex gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
+            {(['2018', '2023'] as IEC62915Edition[]).map((ed) => (
+              <button
+                key={ed}
+                onClick={() => handleEditionToggle(ed)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  retestEdition === ed
+                    ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                )}
+              >
+                {ed}
+              </button>
+            ))}
+          </div>
+          <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
+            {retestEdition === '2023' ? 'Includes DynMechLoad, PID96, HotSpot, ReverseCurrentOverload' : 'Original 2018 scope'}
+          </span>
+        </div>
+      )}
+
       {/* Standard info */}
       <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-4 py-3">
         <h3 className="font-semibold text-blue-900 dark:text-blue-200">{standard.name}</h3>
@@ -66,13 +116,15 @@ export default function StandardsConfig() {
 
       {/* Action buttons */}
       <div className="flex gap-2">
-        <button
-          onClick={() => setShowComparison(!showComparison)}
-          className={cn("btn-secondary text-xs", showComparison && "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700")}
-        >
-          <ArrowLeftRight size={14} />
-          {showComparison ? "Hide" : "Show"} Comparison
-        </button>
+        {!isRetestTab && (
+          <button
+            onClick={() => setShowComparison(!showComparison)}
+            className={cn("btn-secondary text-xs", showComparison && "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700")}
+          >
+            <ArrowLeftRight size={14} />
+            {showComparison ? "Hide" : "Show"} Comparison
+          </button>
+        )}
         <button
           onClick={() => setShowMatrix(!showMatrix)}
           className={cn("btn-secondary text-xs", showMatrix && "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700")}
@@ -81,8 +133,8 @@ export default function StandardsConfig() {
         </button>
       </div>
 
-      {/* Side-by-side Comparison */}
-      {showComparison && (
+      {/* Side-by-side Comparison (non-retest standards) */}
+      {showComparison && !isRetestTab && (
         <div className="card">
           <h3 className="mb-4 text-base font-semibold text-slate-900 dark:text-white">Standards Comparison</h3>
           <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
@@ -125,7 +177,7 @@ export default function StandardsConfig() {
                   <td className="px-4 py-2.5 font-medium text-slate-800 dark:text-slate-200">Max Test Duration</td>
                   {compStandards.map((s) => (
                     <td key={s.id} className="px-4 py-2.5 text-center text-slate-600 dark:text-slate-400">
-                      {Math.max(...s.tests.map((t) => t.testHours)).toLocaleString()}h
+                      {s.tests.length > 0 ? Math.max(...s.tests.map((t) => t.testHours)).toLocaleString() + 'h' : '-'}
                     </td>
                   ))}
                 </tr>
@@ -136,7 +188,6 @@ export default function StandardsConfig() {
                     return <td key={s.id} className="px-4 py-2.5 text-center text-slate-600 dark:text-slate-400">{avg}</td>;
                   })}
                 </tr>
-                {/* Per-category comparison */}
                 {CHAMBER_CATEGORIES.slice(0, 5).map((cat) => (
                   <tr key={cat} className="border-b border-slate-100 dark:border-slate-700">
                     <td className="px-4 py-2.5 font-medium text-slate-800 dark:text-slate-200">{cat} Tests</td>
@@ -159,8 +210,64 @@ export default function StandardsConfig() {
         </div>
       )}
 
-      {/* Test Mapping Matrix */}
-      {showMatrix && (
+      {/* IEC 62915 Retest Matrix */}
+      {isRetestTab && showMatrix && (
+        <div className="card">
+          <h3 className="mb-4 text-base font-semibold text-slate-900 dark:text-white">
+            IEC 62915:{retestEdition} Retest Matrix
+          </h3>
+          <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50">
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Component</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Change Type</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Retest Level</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Required Tests</th>
+                </tr>
+              </thead>
+              <tbody>
+                {IEC62915_RETEST_MATRIX.map((entry, i) => {
+                  const compInfo = BOM_COMPONENT_INFO.find((c) => c.id === entry.component);
+                  const tests = retestEdition === '2018' ? entry.testsRequired2018 : entry.testsRequired2023;
+                  return (
+                    <tr key={i} className="border-b border-slate-100 dark:border-slate-700">
+                      <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">
+                        {compInfo?.name ?? entry.component}
+                      </td>
+                      <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                        {entry.changeType}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={cn(
+                          "inline-block rounded px-1.5 py-0.5 text-[10px] font-medium",
+                          entry.retestLevel === 'full' ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" :
+                          entry.retestLevel === 'partial' ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" :
+                          "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                        )}>
+                          {entry.retestLevel}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                        <div className="flex flex-wrap gap-1">
+                          {tests.map((t) => (
+                            <span key={t} className="inline-block rounded bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 text-[10px] text-blue-700 dark:text-blue-300">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Test Mapping Matrix (non-retest) */}
+      {!isRetestTab && showMatrix && (
         <div className="card">
           <h3 className="mb-4 text-base font-semibold text-slate-900 dark:text-white">BoM &rarr; Test Mapping Matrix</h3>
           <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
@@ -177,7 +284,7 @@ export default function StandardsConfig() {
                 {(Object.keys(standard.bomTestMapping) as Array<keyof typeof standard.bomTestMapping>).map((comp) => (
                   <tr key={comp} className="border-b border-slate-100 dark:border-slate-700">
                     <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200 sticky left-0 bg-white dark:bg-slate-800/50 z-10">
-                      {comp === "JunctionBox" ? "Junction Box" : comp}
+                      {BOM_COMPONENT_INFO.find((c) => c.id === comp)?.name ?? comp}
                     </td>
                     {CHAMBER_CATEGORIES.map((cat) => {
                       const has = standard.bomTestMapping[comp]?.some((c) => c.startsWith(cat));

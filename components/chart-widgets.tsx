@@ -164,7 +164,7 @@ export function StandardComparisonRadar() {
         <PolarRadiusAxis tick={{ fontSize: 10 }} />
         <Radar name="IEC" dataKey="IEC" stroke="#2563eb" fill="#2563eb" fillOpacity={0.15} />
         <Radar name="MNRE" dataKey="MNRE" stroke="#10b981" fill="#10b981" fillOpacity={0.15} />
-        <Radar name="REC" dataKey="REC" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} />
+        <Radar name="BIS" dataKey="BIS" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} />
         <Tooltip
           contentStyle={{
             background: '#fff',
