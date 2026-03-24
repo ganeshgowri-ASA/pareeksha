@@ -3,16 +3,18 @@ export type ChamberTypeId =
   | 'DH1000' | 'DH2000' | 'DH3000'
   | 'TC50' | 'TC200' | 'TC400' | 'TC600'
   | 'HF10' | 'HF20' | 'HF40'
-  | 'PID108' | 'PID288'
+  | 'PID108' | 'PID288' | 'PID96'
   | 'UV15' | 'UV60'
-  | 'SaltMist' | 'SandDust' | 'MechLoad' | 'Hail'
-  | 'BDT' | 'IPTest';
+  | 'SaltMist' | 'SandDust' | 'MechLoad' | 'DynMechLoad' | 'Hail'
+  | 'BDT' | 'IPTest'
+  | 'HotSpot' | 'ReverseCurrentOverload';
 
 /** Chamber category */
 export type ChamberCategory =
   | 'DH' | 'TC' | 'HF' | 'PID' | 'UV'
-  | 'SaltMist' | 'SandDust' | 'MechLoad' | 'Hail'
-  | 'BDT' | 'IPTest';
+  | 'SaltMist' | 'SandDust' | 'MechLoad' | 'DynMechLoad' | 'Hail'
+  | 'BDT' | 'IPTest'
+  | 'HotSpot' | 'ReverseCurrentOverload';
 
 /** Chamber type definition */
 export interface ChamberType {
@@ -26,18 +28,62 @@ export interface ChamberType {
   testDurationHrs: number;
 }
 
-/** BoM component identifiers */
+/**
+ * BoM component identifiers per IEC TS 62915
+ * Expanded to include sub-elements for retesting matrix
+ */
 export type BoMComponent =
   | 'Glass' | 'Encapsulant' | 'Cell' | 'Frame' | 'JunctionBox'
-  | 'Backsheet' | 'Foil' | 'Wafer' | 'Ribbon' | 'Sealant' | 'Potting';
+  | 'Backsheet' | 'Foil' | 'Wafer' | 'Ribbon' | 'Sealant' | 'Potting'
+  | 'Interconnect' | 'Busbar' | 'EdgeSeal' | 'BypassDiode'
+  | 'Connector' | 'PottingMaterial' | 'Adhesive'
+  | 'StructuralMember' | 'CellLayout' | 'ModuleDimension';
+
+/** BoM component category for grouping in UI */
+export type BoMCategory =
+  | 'Frontsheet' | 'Encapsulation' | 'CellAssembly' | 'Backside'
+  | 'Electrical' | 'Mechanical' | 'DesignLayout';
+
+/** BoM component metadata for IEC 62915 */
+export interface BoMComponentInfo {
+  id: BoMComponent;
+  name: string;
+  category: BoMCategory;
+  description: string;
+  /** Sub-elements per IEC 62915 */
+  subElements?: string[];
+  /** Whether this component exists in 2018 edition */
+  in2018: boolean;
+  /** Whether this component exists in 2023 edition */
+  in2023: boolean;
+}
 
 /** Change type identifiers */
 export type ChangeType =
   | 'NewSupplier' | 'MaterialChange' | 'NewFactory'
-  | 'DesignChange' | 'BOMUpgrade' | 'Requalification';
+  | 'DesignChange' | 'BOMUpgrade' | 'Requalification'
+  | 'ThicknessChange' | 'DimensionChange' | 'ProcessChange';
 
-/** Standard identifiers */
-export type StandardId = 'IEC' | 'MNRE' | 'REC' | 'Custom';
+/** Standard identifiers - Generic (no REC) */
+export type StandardId = 'IEC' | 'IEC62915_2018' | 'IEC62915_2023' | 'MNRE' | 'BIS' | 'Custom';
+
+/** IEC 62915 edition */
+export type IEC62915Edition = '2018' | '2023';
+
+/** Retest requirement level */
+export type RetestLevel = 'full' | 'partial' | 'none' | 'engineering_judgment';
+
+/** IEC 62915 Retest matrix entry */
+export interface RetestRequirement {
+  component: BoMComponent;
+  changeType: ChangeType;
+  /** Tests required per IEC 62915:2018 */
+  testsRequired2018: ChamberTypeId[];
+  /** Tests required per IEC 62915:2023 */
+  testsRequired2023: ChamberTypeId[];
+  retestLevel: RetestLevel;
+  notes?: string;
+}
 
 /** Test profile within a standard */
 export interface TestProfile {
@@ -47,6 +93,8 @@ export interface TestProfile {
   testHours: number;
   samplesRequired: number;
   description: string;
+  /** MQT reference number per IEC 61215/61730 */
+  mqtRef?: string;
   /** Alias for testHours (DARSHANA compat) */
   durationHrs: number;
   /** Alias for samplesRequired (DARSHANA compat) */
@@ -143,4 +191,6 @@ export interface AppState {
   calculationInput: CalculationInput;
   departments: Department[];
   bomChanges: BoMChange[];
+  /** Selected IEC 62915 edition for comparison */
+  iec62915Edition?: IEC62915Edition;
 }
