@@ -1,5 +1,7 @@
 'use client';
 
+import ChamberCalculator from '@/components/chamber-calculator';
+
 export default function CalculatorPage() {
   return (
     <div className="space-y-8">
@@ -9,8 +11,8 @@ export default function CalculatorPage() {
           Calculate chamber requirements based on project parameters
         </p>
       </div>
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200 empty-state">
-        <p className="text-sm text-surface-500">Calculator form will be integrated after merge with Session B.</p>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+        <ChamberCalculator />
       </div>
     </div>
   );

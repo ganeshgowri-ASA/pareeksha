@@ -13,17 +13,14 @@ export interface ChamberType {
   variants: ChamberVariant[];
 }
 
-export interface BoMComponent {
-  id: string;
-  name: string;
-  category: string;
-}
+// String literal types for BoM matrix UI
+export type BoMComponentId =
+  | 'Glass' | 'Encapsulant' | 'Cell' | 'Frame' | 'JunctionBox'
+  | 'Backsheet' | 'Foil' | 'Wafer' | 'Ribbon' | 'Sealant' | 'Potting';
 
-export interface ChangeType {
-  id: string;
-  name: string;
-  testsRequired: string[];
-}
+export type ChangeTypeId =
+  | 'NewSupplier' | 'MaterialChange' | 'NewFactory'
+  | 'DesignChange' | 'BOMUpgrade' | 'Requalification';
 
 export interface TestProfile {
   id: string;
@@ -36,6 +33,8 @@ export interface TestProfile {
 export interface Department {
   id: string;
   name: string;
+  description?: string;
+  color?: string;
   projectsPerYear: number;
   bomsPerProject: number;
   modulesPerBom: number;
@@ -49,22 +48,28 @@ export interface Standard {
 }
 
 export interface CalculationInput {
-  departments: Department[];
-  bomChanges: Record<string, string[]>;
-  standard: Standard;
-  realizationRate: number;
+  projects: number;
+  boms: number;
+  modules: number;
+  realisationRate: number;
+  workHoursPerYear: number;
 }
 
 export interface CalculationResult {
   chamberType: string;
+  chamberName: string;
   chambersNeeded: number;
   utilizationPct: number;
   totalTestHrs: number;
   bottleneck: boolean;
+  slots: number;
+  totalTestHours: number;
+  chambersRequired: number;
+  utilization: number;
 }
 
 export interface BomChange {
-  componentId: string;
-  changeTypeId: string;
+  component: BoMComponentId;
+  changeType: ChangeTypeId;
   selected: boolean;
 }

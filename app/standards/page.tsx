@@ -1,5 +1,8 @@
 'use client';
 
+import StandardsConfig from '@/components/standards-config';
+import ComparisonTable from '@/components/comparison-table';
+
 export default function StandardsPage() {
   return (
     <div className="space-y-8">
@@ -9,8 +12,12 @@ export default function StandardsPage() {
           Configure test profiles for IEC, MNRE, and REC standards
         </p>
       </div>
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200 empty-state">
-        <p className="text-sm text-surface-500">Standards configurator will be integrated after merge with Session B.</p>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+        <StandardsConfig />
+      </div>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-surface-200">
+        <h2 className="text-lg font-semibold text-surface-800 mb-4">Standards Comparison</h2>
+        <ComparisonTable />
       </div>
     </div>
   );

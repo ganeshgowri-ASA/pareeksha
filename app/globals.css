@@ -128,6 +128,23 @@ body {
   }
 }
 
+/* Form elements */
+.input-field {
+  @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-smooth focus-ring;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-smooth focus-ring;
+}
+
+.card {
+  @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
