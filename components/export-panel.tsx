@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { Download, Printer, FileText, BarChart3, PieChart } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Printer, FileText, BarChart3 } from 'lucide-react';
 import { CalculationResult } from '@/lib/types';
 import { CHAMBERS } from '@/lib/chambers';
 import { exportToCSV } from '@/lib/utils';
