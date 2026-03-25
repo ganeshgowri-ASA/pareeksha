@@ -300,8 +300,8 @@ export default function ExportPage() {
         </div>
       </div>
 
-      {/* Print styles */}
-      <style jsx global>{`
+      {/* Print styles injected for A4 layout */}
+      <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           .no-print { display: none !important; }
           body { margin: 0; }
@@ -309,9 +309,8 @@ export default function ExportPage() {
           table { page-break-inside: avoid; }
           thead { display: table-header-group; }
           tr { page-break-inside: avoid; page-break-after: auto; }
-          .card { box-shadow: none !important; border: none !important; }
         }
-      `}</style>
+      ` }} />
     </div>
   );
 }
